@@ -1,14 +1,14 @@
 import Photos from './pages/Photos';
 import React from 'react';
 
-const App = () => {
-    return (
-        <div>
-            <h1>Photo Sync</h1>
-            <div>Photos</div>
-            <Photos />
-        </div>
-    );
+const App: React.FC = () => {
+  return (
+    <div>
+      <div style={{ marginTop: '20px' }}>
+        <Photos />
+      </div>
+    </div>
+  );
 };
 
 export default App;
