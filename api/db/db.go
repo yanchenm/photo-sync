@@ -3,13 +3,13 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log"
-	"os"
 )
 
-var (
-	HOST = os.Getenv("POSTGRES_HOST")
-	PORT = os.Getenv("POSTGRES_PORT")
+const (
+	HOST = "database"
+	PORT = 5432
 )
 
 type Database struct {

@@ -9,6 +9,11 @@ services:
       - "5432:5432"
     volumes:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   server:
     build:
@@ -17,7 +22,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - default
     ports:
