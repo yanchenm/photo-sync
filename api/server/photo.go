@@ -149,7 +149,6 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	detail.UploadedAt = photo.UploadedAt
 	photo.Details = detail
 
 	if err := s.DB.AddDetail(&detail); err != nil {

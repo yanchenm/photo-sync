@@ -12,7 +12,7 @@ func (db Database) GetDetailForPhoto(id string) (models.Detail, error) {
 	query := `SELECT * FROM details WHERE id = $1;`
 
 	row := db.Conn.QueryRow(query, id)
-	err := row.Scan(&detail.ID, &detail.FileType, &detail.Height, &detail.Width, &detail.Size, &detail.UploadedAt)
+	err := row.Scan(&detail.ID, &detail.FileType, &detail.Height, &detail.Width, &detail.Size)
 
 	switch err {
 	case sql.ErrNoRows:
@@ -23,8 +23,8 @@ func (db Database) GetDetailForPhoto(id string) (models.Detail, error) {
 }
 
 func (db Database) AddDetail(detail *models.Detail) error {
-	query := `INSERT INTO details (id, filetype, height, width, size, uploaded_at) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := db.Conn.Exec(query, detail.ID, detail.FileType, detail.Height, detail.Width, detail.Size, detail.UploadedAt)
+	query := `INSERT INTO details (id, filetype, height, width, size) VALUES ($1, $2, $3, $4, $5)`
+	_, err := db.Conn.Exec(query, detail.ID, detail.FileType, detail.Height, detail.Width, detail.Size)
 
 	return err
 }
