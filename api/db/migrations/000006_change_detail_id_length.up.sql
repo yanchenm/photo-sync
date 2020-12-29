@@ -1,0 +1,2 @@
+ALTER TABLE details
+    ALTER COLUMN id TYPE CHAR(27);

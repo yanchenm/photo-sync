@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/yanchenm/photo-sync/models"
 )
 
@@ -33,5 +34,6 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.BeforeSend()
 	_ = respondWithJSON(w, http.StatusCreated, user)
 }

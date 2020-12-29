@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+
 	"github.com/yanchenm/photo-sync/db"
 )
 
@@ -33,6 +36,7 @@ func Initialize(username, password, database string) (*Server, error) {
 
 func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/users/new", s.handleAddUser).Methods("POST")
+	s.Router.HandleFunc("/photos/new", s.handleUploadPhoto).Methods("POST")
 }
 
 func (s *Server) Run(addr string) {
@@ -54,4 +58,10 @@ func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) err
 
 func respondWithError(w http.ResponseWriter, status int, message string) error {
 	return respondWithJSON(w, status, map[string]string{"error": message})
+}
+
+func newAWSSession(region string) (*session.Session, error) {
+	return session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	})
 }

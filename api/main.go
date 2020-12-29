@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/yanchenm/photo-sync/server"
 	"log"
 	"os"
+
+	"github.com/yanchenm/photo-sync/server"
 )
 
 func main() {

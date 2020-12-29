@@ -3,8 +3,9 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
 	_ "github.com/lib/pq"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -32,6 +33,6 @@ func Initialize(username, password, database string) (Database, error) {
 		return db, err
 	}
 
-	log.Println("Database connection established.")
+	log.Info("database connection established")
 	return db, nil
 }

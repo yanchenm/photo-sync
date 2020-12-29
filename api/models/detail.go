@@ -7,5 +7,4 @@ type Detail struct {
 	Width       int     `json:"width"`
 	Size        float32 `json:"size"`
 	UploadedAt  string  `json:"uploaded_at"`
-	ProcessedAt string  `json:"processed_at"`
 }

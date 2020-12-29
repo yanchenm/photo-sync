@@ -23,3 +23,7 @@ func (user *User) VerifyPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	return err == nil
 }
+
+func (user *User) BeforeSend() {
+	user.Password = ""
+}

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Photos
 CREATE TABLE IF NOT EXISTS Details
 (
     id           CHAR(20) PRIMARY KEY REFERENCES Photos (id) ON DELETE CASCADE,
-    file_type    TEXT  NOT NULL,
+    filetype    TEXT  NOT NULL,
     height       INT   NOT NULL,
     width        INT   NOT NULL,
     size         FLOAT NOT NULL,
