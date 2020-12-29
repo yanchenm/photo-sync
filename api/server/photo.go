@@ -20,7 +20,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
 	"github.com/segmentio/ksuid"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/yanchenm/photo-sync/models"
 )
@@ -62,17 +61,14 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 
 	// Set max photo size to 10MB
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		log.Error(fmt.Sprintf("error parsing form: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid form")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "failed to parse form", err)
 		return
 	}
 
 	// Get photo from request body
-	log.Info("reading photo from request")
 	file, header, err := r.FormFile("photo")
 	if err != nil {
-		log.Error(fmt.Sprintf("error parsing upload: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid file upload")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid file upload", err)
 		return
 	}
 
@@ -84,33 +80,27 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 	photo.ID = id
 
 	// Read image upload into buffer
-	log.Info("reading file into buffer")
 	buffer := new(bytes.Buffer)
 	size, err := buffer.ReadFrom(file)
 	file.Close()
 	fileBuffer := buffer.Bytes()
 
 	if err != nil {
-		log.Error(fmt.Sprintf("error reading photo: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid image file")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
 	// Open image
-	log.Info("reading image")
 	img, fileType, err := image.Decode(bytes.NewReader(fileBuffer))
 	if err != nil {
-		log.Error(fmt.Sprintf("error decoding photo: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid image file")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
 	// Get photo details
-	log.Info("reading image config")
 	config, _, err := image.DecodeConfig(bytes.NewReader(fileBuffer))
 	if err != nil {
-		log.Error(fmt.Sprintf("error decoding photo config: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid image file")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
@@ -123,40 +113,31 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a thumbnail to display on main page
-	log.Info("creating thumbnail")
 	thumbnail := resize.Thumbnail(600, 600, img, resize.Bicubic)
 
 	pr, pw := io.Pipe()
 
 	go func() {
-		log.Info("writing image to pipe")
 		jpeg.Encode(pw, thumbnail, &jpeg.Options{Quality: 90})
 		pw.Close()
 	}()
 
 	// Upload image and thumbnail to S3
-	log.Info("starting new AWS session")
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
-
 	if err != nil {
-		log.Error(fmt.Sprintf("error initializing AWS session: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, "Error connecting to S3")
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to initialize AWS session", err)
 		return
 	}
 
-	log.Info(fmt.Sprintf("uploading %s to s3", id+"."+fileType))
 	err = uploadToS3(sess, os.Getenv("S3_BUCKET"), id+"."+fileType, bytes.NewReader(fileBuffer))
 	if err != nil {
-		log.Error(fmt.Sprintf("error uploading to S3: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, "Error uploading to S3")
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
 		return
 	}
 
-	log.Info(fmt.Sprintf("uploading %s to s3", id+"_thumb.jpeg"))
 	err = uploadToS3(sess, os.Getenv("S3_BUCKET"), id+"_thumb.jpeg", pr)
 	if err != nil {
-		log.Error(fmt.Sprintf("error uploading to S3: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, "Error uploading to S3")
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
 		return
 	}
 
@@ -164,16 +145,15 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 	photo.Thumbnail = id + "_thumb.jpeg"
 
 	if err := s.DB.AddPhoto(&photo); err != nil {
-		log.Error(fmt.Sprintf("error adding photo to db: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, "Error adding photo to database")
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo to database", err)
 		return
 	}
 
 	detail.UploadedAt = photo.UploadedAt
+	photo.Details = detail
 
 	if err := s.DB.AddDetail(&detail); err != nil {
-		log.Error(fmt.Sprintf("error adding photo detail to db: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, "Error adding photo detail to database")
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo details to database", err)
 		return
 	}
 	_ = respondWithJSON(w, http.StatusOK, photo)
@@ -184,8 +164,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&params); err != nil {
-		log.Error(fmt.Sprintf("error decoding request: %s", err))
-		_ = respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
 		return
 	}
 
@@ -193,8 +172,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
 
 	photos, err := s.DB.GetPhotos(models.User{Email: "yanchenm@gmail.com"}, params.Start, params.Count)
 	if err != nil {
-		log.Error(fmt.Sprintf("error getting photos from database: %s", err))
-		_ = respondWithError(w, http.StatusInternalServerError, err.Error())
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
 		return
 	}
 
