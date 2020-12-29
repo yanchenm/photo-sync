@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -37,6 +38,8 @@ func Initialize(username, password, database string) (*Server, error) {
 func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/users/new", s.handleAddUser).Methods("POST")
 	s.Router.HandleFunc("/photos/new", s.handleUploadPhoto).Methods("POST")
+	s.Router.HandleFunc("/photos", s.handleGetPhotos).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.handleGetPhotoByID).Methods("GET")
 }
 
 func (s *Server) Run(addr string) {
@@ -60,7 +63,12 @@ func respondWithError(w http.ResponseWriter, status int, message string) error {
 	return respondWithJSON(w, status, map[string]string{"error": message})
 }
 
-func newAWSSession(region string) (*session.Session, error) {
+func logErrorAndRespond(w http.ResponseWriter, status int, message string, err error) error {
+	log.Error(fmt.Sprintf("%s: %s", message, err))
+	return respondWithError(w, status, message)
+}
+
+func getNewAWSSession(region string) (*session.Session, error) {
 	return session.NewSession(&aws.Config{
 		Region: aws.String(region),
 	})

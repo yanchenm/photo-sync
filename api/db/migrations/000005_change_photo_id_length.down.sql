@@ -1,2 +1,0 @@
-ALTER TABLE photos
-    ALTER COLUMN id TYPE CHAR(20);

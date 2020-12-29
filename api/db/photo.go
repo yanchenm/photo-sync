@@ -7,30 +7,6 @@ import (
 	"github.com/yanchenm/photo-sync/models"
 )
 
-func (db Database) GetAllPhotos(user models.User) (*models.PhotoList, error) {
-	res := &models.PhotoList{}
-	query := `SELECT * FROM photos WHERE username = $1 ORDER BY uploaded_at DESC;`
-
-	rows, err := db.Conn.Query(query, user.Email)
-	if err != nil {
-		return res, err
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var photo models.Photo
-		err := rows.Scan(&photo.ID, &photo.User, &photo.Filename, &photo.Key, &photo.Thumbnail, &photo.UploadedAt)
-		if err != nil {
-			return res, err
-		}
-
-		res.Photos = append(res.Photos, photo)
-	}
-
-	return res, nil
-}
-
 func (db Database) GetPhotos(user models.User, start, count int) (*models.PhotoList, error) {
 	res := &models.PhotoList{}
 	query := `SELECT * FROM photos WHERE username = $1 ORDER BY uploaded_at DESC LIMIT $2 OFFSET $3;`
