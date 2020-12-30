@@ -192,7 +192,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
 		photos.Photos[i].Url = signedUrl
 	}
 
-	_ = respondWithJSON(w, http.StatusOK, photos)
+	_ = respondWithJSON(w, http.StatusCreated, photos)
 }
 
 func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
@@ -201,14 +201,26 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
 
 	photo, err := s.DB.GetPhotoById(id)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to get photo from database", err)
-		return
+		switch err.Error() {
+		case "no matching record":
+			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			return
+		default:
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
+			return
+		}
 	}
 
 	detail, err := s.DB.GetDetailForPhoto(id)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to get photo details from database", err)
-		return
+		switch err.Error() {
+		case "no matching record":
+			_ = logErrorAndRespond(w, http.StatusNotFound, "photo details do not exist", err)
+			return
+		default:
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo details", err)
+			return
+		}
 	}
 
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
@@ -227,4 +239,62 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
 	photo.Details = detail
 
 	_ = respondWithJSON(w, http.StatusOK, photo)
+}
+
+func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	photo, err := s.DB.GetPhotoById(id)
+	if err != nil {
+		switch err.Error() {
+		case "no matching record":
+			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			return
+		default:
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
+			return
+		}
+	}
+
+	// Remove photo from S3
+	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to establish AWS session", err)
+		return
+	}
+
+	svc := s3.New(sess)
+	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(os.Getenv("S3_BUCKET")),
+		Key:    aws.String(photo.Key),
+	})
+
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
+		return
+	}
+
+	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(os.Getenv("S3_BUCKET")),
+		Key:    aws.String(photo.Thumbnail),
+	})
+
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
+		return
+	}
+
+	if err := s.DB.DeletePhoto(id); err != nil {
+		switch err.Error() {
+		case "no matching record":
+			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			return
+		default:
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to delete photo", err)
+			return
+		}
+	}
+
+	_ = respondWithJSON(w, http.StatusOK, nil)
 }

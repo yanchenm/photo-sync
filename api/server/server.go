@@ -40,6 +40,7 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/photos/new", s.handleUploadPhoto).Methods("POST")
 	s.Router.HandleFunc("/photos", s.handleGetPhotos).Methods("GET")
 	s.Router.HandleFunc("/photos/{id}", s.handleGetPhotoByID).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.handleDeletePhoto).Methods("DELETE")
 }
 
 func (s *Server) Run(addr string) {
