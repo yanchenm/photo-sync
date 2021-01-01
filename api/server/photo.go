@@ -189,7 +189,15 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 			return
 		}
 
+		thumbUrl, err := generateSignedUrl(sess, os.Getenv("S3_BUCKET"), photo.Thumbnail, photo.Thumbnail+".jpeg")
+		if err != nil {
+			msg := fmt.Sprintf("error signing url for thumbnail %s", photo.ID)
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
+			return
+		}
+
 		photos.Photos[i].Url = signedUrl
+		photos.Photos[i].ThumbnailUrl = thumbUrl
 	}
 
 	_ = respondWithJSON(w, http.StatusCreated, photos)
