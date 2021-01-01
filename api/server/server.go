@@ -37,10 +37,10 @@ func Initialize(username, password, database string) (*Server, error) {
 
 func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/users/new", s.handleAddUser).Methods("POST")
-	s.Router.HandleFunc("/photos/new", s.handleUploadPhoto).Methods("POST")
-	s.Router.HandleFunc("/photos", s.handleGetPhotos).Methods("GET")
-	s.Router.HandleFunc("/photos/{id}", s.handleGetPhotoByID).Methods("GET")
-	s.Router.HandleFunc("/photos/{id}", s.handleDeletePhoto).Methods("DELETE")
+	s.Router.HandleFunc("/photos/new", s.authenticate(s.handleUploadPhoto)).Methods("POST")
+	s.Router.HandleFunc("/photos", s.authenticate(s.handleGetPhotos)).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.authenticate(s.handleGetPhotoByID)).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.authenticate(s.handleDeletePhoto)).Methods("DELETE")
 	s.Router.HandleFunc("/login", s.login).Methods("POST")
 	s.Router.HandleFunc("/logout", s.authenticate(s.logout)).Methods("POST")
 	s.Router.HandleFunc("/refresh", s.refreshAuth).Methods("POST")

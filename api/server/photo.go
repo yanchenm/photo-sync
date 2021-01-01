@@ -54,9 +54,9 @@ func generateSignedUrl(sess *session.Session, bucket, key, fileName string) (str
 	return req.Presign(1 * time.Minute)
 }
 
-func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user models.User) {
 	photo := models.Photo{
-		User: "yanchenm@gmail.com",
+		User: user.Email,
 	}
 
 	// Set max photo size to 10MB
@@ -158,7 +158,7 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request) {
 	_ = respondWithJSON(w, http.StatusOK, photo)
 }
 
-func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user models.User) {
 	params := GetPhotosParams{}
 
 	decoder := json.NewDecoder(r.Body)
@@ -169,7 +169,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	photos, err := s.DB.GetPhotos(models.User{Email: "yanchenm@gmail.com"}, params.Start, params.Count)
+	photos, err := s.DB.GetPhotos(user, params.Start, params.Count)
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
 		return
@@ -195,7 +195,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request) {
 	_ = respondWithJSON(w, http.StatusCreated, photos)
 }
 
-func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user models.User) {
 	params := mux.Vars(r)
 	id := params["id"]
 
@@ -209,6 +209,11 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
 			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
 			return
 		}
+	}
+
+	if photo.User != user.Email {
+		_ = respondWithError(w, http.StatusUnauthorized, "you don't have permission to view this photo")
+		return
 	}
 
 	detail, err := s.DB.GetDetailForPhoto(id)
@@ -241,7 +246,7 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request) {
 	_ = respondWithJSON(w, http.StatusOK, photo)
 }
 
-func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user models.User) {
 	params := mux.Vars(r)
 	id := params["id"]
 
@@ -255,6 +260,11 @@ func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request) {
 			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
 			return
 		}
+	}
+
+	if photo.User != user.Email {
+		_ = respondWithError(w, http.StatusUnauthorized, "you don't have permission to view this photo")
+		return
 	}
 
 	// Remove photo from S3

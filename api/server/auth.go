@@ -50,7 +50,7 @@ func (s *Server) authenticate(next func(http.ResponseWriter, *http.Request, mode
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method")
 			}
-			return []byte(os.Getenv("REFRESH_TOKEN_KEY")), nil
+			return []byte(os.Getenv("ACCESS_TOKEN_KEY")), nil
 		})
 
 		if err != nil || !accessToken.Valid {
