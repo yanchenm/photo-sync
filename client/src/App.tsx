@@ -1,13 +1,25 @@
+import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+
+import Login from './pages/Login';
 import Photos from './pages/Photos';
 import React from 'react';
+import SignUp from './pages/SignUp';
 
 const App: React.FC = () => {
   return (
-    <div>
-      <div style={{ marginTop: '20px' }}>
-        <Photos />
-      </div>
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/photos">
+          <Photos />
+        </Route>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/signup">
+          <SignUp />
+        </Route>
+      </Switch>
+    </Router>
   );
 };
 
