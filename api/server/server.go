@@ -41,6 +41,9 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/photos", s.handleGetPhotos).Methods("GET")
 	s.Router.HandleFunc("/photos/{id}", s.handleGetPhotoByID).Methods("GET")
 	s.Router.HandleFunc("/photos/{id}", s.handleDeletePhoto).Methods("DELETE")
+	s.Router.HandleFunc("/login", s.login).Methods("POST")
+	s.Router.HandleFunc("/logout", s.authenticate(s.logout)).Methods("POST")
+	s.Router.HandleFunc("/refresh", s.refreshAuth).Methods("POST")
 }
 
 func (s *Server) Run(addr string) {
