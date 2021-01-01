@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,15 +10,13 @@ import (
 
 func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
-
-	if err := r.ParseForm(); err != nil {
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
 		return
 	}
 
-	user.Email = r.FormValue("email")
-	user.Name = r.FormValue("name")
-	user.Password = r.FormValue("password")
+	defer r.Body.Close()
 
 	if user.Email == "" || user.Name == "" || user.Password == "" {
 		fields := []string{"email", "name", "password"}

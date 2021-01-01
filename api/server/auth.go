@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -63,32 +64,33 @@ func (s *Server) authenticate(next func(http.ResponseWriter, *http.Request, mode
 }
 
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	user := models.User{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
 		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+	defer r.Body.Close()
 
-	if email == "" || password == "" {
+	if user.Email == "" || user.Password == "" {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "missing required values", nil)
 		return
 	}
 
-	user, err := s.DB.GetUserFromEmail(email)
+	dbUser, err := s.DB.GetUserFromEmail(user.Email)
 	if err != nil {
 		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
-	if !user.VerifyPassword(password) {
+	if !dbUser.VerifyPassword(user.Password) {
 		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
 	accessTokenExpiration := time.Now().Add(15 * time.Minute)
-	accessTokenString, err := generateToken(email, os.Getenv("ACCESS_TOKEN_KEY"), accessTokenExpiration)
+	accessTokenString, err := generateToken(user.Email, os.Getenv("ACCESS_TOKEN_KEY"), accessTokenExpiration)
 
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
@@ -96,7 +98,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	refreshTokenExpiration := time.Now().Add(14 * 24 * time.Hour)
-	refreshTokenString, err := generateToken(email, os.Getenv("REFRESH_TOKEN_KEY"), refreshTokenExpiration)
+	refreshTokenString, err := generateToken(user.Email, os.Getenv("REFRESH_TOKEN_KEY"), refreshTokenExpiration)
 
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
@@ -104,7 +106,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = s.DB.AddToken(models.RefreshToken{
-		Email: email,
+		Email: user.Email,
 		Token: refreshTokenString,
 	})
 

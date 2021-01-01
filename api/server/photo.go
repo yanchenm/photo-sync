@@ -200,7 +200,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 		photos.Photos[i].ThumbnailUrl = thumbUrl
 	}
 
-	_ = respondWithJSON(w, http.StatusCreated, photos)
+	_ = respondWithJSON(w, http.StatusOK, photos)
 }
 
 func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user models.User) {
