@@ -48,6 +48,7 @@ func (s *Server) initializeRoutes() {
 
 func (s *Server) Run(addr string) {
 	log.Fatal(http.ListenAndServe(addr, s.Router))
+	defer s.DB.Conn.Close()
 }
 
 func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) error {
