@@ -1,23 +1,55 @@
+import { Link, useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
 import { SignUpData, addNewUser } from '../api/users';
 
 import Alert from '../components/Alert';
-import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 
 const SignUp: React.FC = () => {
   const { register, handleSubmit, errors } = useForm();
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [failureVisible, setFailureVisible] = useState(false);
+  const history = useHistory();
+
   const onSubmit = async (data: SignUpData) => {
     const res = await addNewUser(data);
-    setAlertVisible(true);
+    if (res) {
+      showSuccessAlert();
+    } else {
+      showFailAlert();
+    }
   };
 
-  const [alertVisible, setAlertVisible] = useState(false);
+  const showSuccessAlert = () => {
+    setSuccessVisible(true);
+    setTimeout(() => setSuccessVisible(false), 5000);
+  };
+
+  const showFailAlert = () => {
+    setFailureVisible(true);
+    setTimeout(() => setFailureVisible(false), 5000);
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-30 w-full space-y-3">
-        <Alert visible={alertVisible} />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Alert
+        visible={successVisible}
+        positive
+        header="Account created!"
+        body="Please sign in to continue"
+        onClose={() => setSuccessVisible(false)}
+        clickable
+        onClick={() => history.push('/signin')}
+      />
+      <Alert
+        visible={failureVisible}
+        positive={false}
+        header="Error!"
+        body="There was a problem creating your account. Please try again."
+        onClose={() => setFailureVisible(false)}
+        clickable={false}
+      />
+      <div className="max-w-md w-full space-y-3">
         <h1 className="font-default text-5xl font-bold mt-6 text-center">sign up</h1>
         <p className="font-default text-center text-md text-gray-600">
           or&nbsp;
@@ -25,7 +57,7 @@ const SignUp: React.FC = () => {
             sign in
           </Link>
         </p>
-        <div className="rounded-md shadow-md space-y-6 bg-white px-9 py-6 mt-8">
+        <div className="rounded-md shadow-md space-y-6 bg-white px-9 py-6">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="name" className="font-default text-md">
@@ -34,7 +66,7 @@ const SignUp: React.FC = () => {
               <input
                 id="name"
                 name="name"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                className="font-default appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                 ref={register({ required: true })}
               />
               {errors.name && errors.name.type === 'required' && (
@@ -48,7 +80,7 @@ const SignUp: React.FC = () => {
               <input
                 id="email"
                 name="email"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                className="font-default appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                 ref={register({
                   required: true,
                   pattern: {
@@ -72,7 +104,7 @@ const SignUp: React.FC = () => {
                 id="password"
                 name="password"
                 type="password"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                className="font-default appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                 ref={register({ required: true, minLength: 8 })}
               />
               {errors.password && errors.password.type === 'required' && (
@@ -84,7 +116,7 @@ const SignUp: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-emerald-400 active:bg-emerald-500 hover:shadow-md focus:outline-none"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-emerald-400 active:bg-emerald-500 focus:outline-none hover:shadow-md"
             >
               Sign Up
             </button>

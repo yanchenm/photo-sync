@@ -2,3 +2,4 @@
 */.idea/
 */build/
 api/.env
+client/.eslintcache
