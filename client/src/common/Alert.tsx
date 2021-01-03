@@ -24,6 +24,7 @@ const Alert: React.FC<AlertProps> = ({ visible, positive, header, body, onClose,
             } border-l-4 rounded-md shadow-md px-9 py-4 max-w-sm`}
             role="alert"
             style={{ cursor: `${clickable ? 'pointer' : ''}` }}
+            onClick={clickable && onClick != null ? () => onClick() : undefined}
           >
             <button
               className="px-n7 py-n4 ml-auto bg-transparent border-0 opacity-6 float-right text-xl leading-none font-semibold outline-none focus:outline-none"

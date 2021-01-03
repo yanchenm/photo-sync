@@ -1,11 +1,11 @@
 import { Link, useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
-import { SignUpData, addNewUser } from '../api/users';
+import { SignUpData, addNewUser } from '../common/userHandler';
 
-import Alert from '../components/Alert';
+import Alert from '../common/Alert';
 import { useForm } from 'react-hook-form';
 
-const SignUp: React.FC = () => {
+const SignUpPage: React.FC = () => {
   const { register, handleSubmit, errors } = useForm();
   const [successVisible, setSuccessVisible] = useState(false);
   const [failureVisible, setFailureVisible] = useState(false);
@@ -39,7 +39,7 @@ const SignUp: React.FC = () => {
         body="Please sign in to continue"
         onClose={() => setSuccessVisible(false)}
         clickable
-        onClick={() => history.push('/signin')}
+        onClick={() => history.push('/login')}
       />
       <Alert
         visible={failureVisible}
@@ -127,4 +127,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default SignUpPage;

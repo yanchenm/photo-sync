@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PhotoCard from '../components/PhotoCard';
-import PhotoDetails from '../components/PhotoDetails';
+import PhotoCard from './PhotoCard';
+import PhotoDetails from './PhotoDetails';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
-const Photos: React.FC = () => {
+const PhotosPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
 
   const showDetails = (id: number) => {
@@ -41,4 +41,4 @@ const Photos: React.FC = () => {
   );
 };
 
-export default Photos;
+export default PhotosPage;
