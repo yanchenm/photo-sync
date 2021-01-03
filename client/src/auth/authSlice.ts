@@ -1,4 +1,4 @@
-import { Credentials, signIn, signOut } from './authHandler';
+import { Credentials, refreshAuth, signIn, signOut } from './authHandler';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { AppThunk } from '../store';
@@ -53,6 +53,22 @@ export const trySignIn = (credentials: Credentials): AppThunk => async (dispatch
   let accessToken;
   try {
     accessToken = await signIn(credentials);
+    if (accessToken == null) {
+      dispatch(signInFailed());
+      return;
+    }
+  } catch (err) {
+    dispatch(signInFailed());
+    return;
+  }
+
+  dispatch(signInSuccessful(accessToken));
+};
+
+export const tryRefresh = (): AppThunk => async (dispatch) => {
+  let accessToken;
+  try {
+    accessToken = await refreshAuth();
     if (accessToken == null) {
       dispatch(signInFailed());
       return;

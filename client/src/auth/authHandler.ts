@@ -18,6 +18,19 @@ export const signIn = async (userData: Credentials): Promise<string | null> => {
   }
 };
 
+export const refreshAuth = async (): Promise<string | null> => {
+  try {
+    const res = await api.post('/refresh');
+    if (res.status !== 200) {
+      return null;
+    }
+
+    return res.data['token'];
+  } catch (error) {
+    return null;
+  }
+};
+
 export const signOut = async (accessToken: string): Promise<boolean> => {
   const config = {
     headers: { Authorization: `Bearer ${accessToken}` },
