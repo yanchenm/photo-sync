@@ -47,6 +47,7 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/api/login", s.login).Methods("POST")
 	s.Router.HandleFunc("/api/logout", s.authenticate(s.logout)).Methods("POST")
 	s.Router.HandleFunc("/api/refresh", s.refreshAuth).Methods("POST")
+	s.Router.HandleFunc("/api/user", s.authenticate(s.handleGetAuthenticatedUser)).Methods("GET")
 }
 
 func (s *Server) Run(addr string) {

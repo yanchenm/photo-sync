@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -11,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -159,17 +159,18 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 }
 
 func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user models.User) {
-	params := GetPhotosParams{}
-
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&params); err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
+	start, err := strconv.Atoi(r.FormValue("start"))
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
 		return
 	}
 
-	defer r.Body.Close()
+	count, err := strconv.Atoi(r.FormValue("count"))
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
+	}
 
-	photos, err := s.DB.GetPhotos(user, params.Start, params.Count)
+	photos, err := s.DB.GetPhotos(user, start, count)
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
 		return

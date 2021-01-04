@@ -45,3 +45,14 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 	user.BeforeSend()
 	_ = respondWithJSON(w, http.StatusCreated, user)
 }
+
+func (s *Server) handleGetAuthenticatedUser(w http.ResponseWriter, r *http.Request, authUser models.User) {
+	user, err := s.DB.GetUserFromEmail(authUser.Email)
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user details", err)
+		return
+	}
+
+	user.BeforeSend()
+	_ = respondWithJSON(w, http.StatusOK, user)
+}
