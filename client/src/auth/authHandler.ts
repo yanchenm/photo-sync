@@ -1,4 +1,4 @@
-import api from '../api';
+import api, { getAuthorizationHeader } from '../api';
 
 export type Credentials = {
   email: string;
@@ -13,7 +13,7 @@ export const signIn = async (userData: Credentials): Promise<string | null> => {
     }
 
     return res.data['token'];
-  } catch (error) {
+  } catch (err) {
     return null;
   }
 };
@@ -24,20 +24,15 @@ export const refreshAuth = async (): Promise<string | null> => {
     if (res.status !== 200) {
       return null;
     }
-
     return res.data['token'];
-  } catch (error) {
+  } catch (err) {
     return null;
   }
 };
 
 export const signOut = async (accessToken: string): Promise<boolean> => {
-  const config = {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-
   try {
-    const res = await api.post('/logout', null, config);
+    const res = await api.post('/logout', null, getAuthorizationHeader(accessToken));
     return res.status === 200;
   } catch (err) {
     return false;

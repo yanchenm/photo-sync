@@ -53,7 +53,9 @@ func (s *Server) initializeRoutes() {
 func (s *Server) Run(addr string) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
+		Debug:            true,
 	})
 
 	loggedRouter := handlers.LoggingHandler(os.Stdout, s.Router)

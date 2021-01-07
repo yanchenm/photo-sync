@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { clearError, tryRefresh } from '../auth/authSlice';
+import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotoCard from './PhotoCard';
 import PhotoDetails from './PhotoDetails';
 import { RootState } from '../store';
@@ -35,9 +37,9 @@ const PhotosPage: React.FC = () => {
   });
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center flex-auto">
       <PhotoDetails onClose={hideDetails} show={showModal} />
-      <div className="max-w-3/4">
+      <div>
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4" style={{ margin: '30px' }}>
           <PhotoCard id={0} onClick={showDetails} />
           <PhotoCard id={1} onClick={showDetails} />

@@ -1,6 +1,6 @@
 import { Link, useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
-import { SignUpData, addNewUser } from '../common/userHandler';
+import { SignUpData, addNewUser } from '../users/userHandler';
 
 import Alert from '../common/Alert';
 import { useForm } from 'react-hook-form';
