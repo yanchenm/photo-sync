@@ -5,9 +5,9 @@ export type Photo = {
   user: string;
   filename: string;
   key: string;
-  url: string | null;
+  url: string;
   thumbnail: string;
-  thumbnail_url: string | null;
+  thumbnail_url: string;
   uploaded_at: string;
   details: PhotoDetails;
 };
@@ -31,7 +31,7 @@ export const getPhotos = async (accessToken: string, start: number, count: numbe
       return null;
     }
 
-    return JSON.parse(res.data);
+    return res.data;
   } catch (err) {
     return null;
   }

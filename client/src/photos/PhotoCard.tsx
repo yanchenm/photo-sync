@@ -1,14 +1,15 @@
+import { Photo } from './photoHandler';
 import React from 'react';
 
 type PhotoCardProps = {
-  id: number;
-  onClick: (id: number) => void;
+  photo: Photo;
+  onClick: (id: string) => void;
 };
 
-const PhotoCard: React.FC<PhotoCardProps> = ({ id, onClick }: PhotoCardProps) => {
+const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onClick }: PhotoCardProps) => {
   return (
-    <div className="overflow-hidden rounded shadow-lg" onClick={() => onClick(id)} style={{ cursor: 'pointer' }}>
-      <img alt="Placeholder" className="block h-auto w-full" src="https://picsum.photos/600/400/?random"></img>
+    <div className="overflow-hidden rounded shadow-lg" onClick={() => onClick(photo.id)} style={{ cursor: 'pointer' }}>
+      <img alt={photo.filename} className="block h-auto w-full" src={photo.thumbnail_url}></img>
     </div>
   );
 };

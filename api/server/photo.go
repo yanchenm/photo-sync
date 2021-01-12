@@ -8,6 +8,7 @@ import (
 	"image/jpeg"
 	_ "image/png"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,9 +18,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/disintegration/imageorient"
 	"github.com/gorilla/mux"
-	"github.com/nfnt/resize"
 	"github.com/segmentio/ksuid"
+	"golang.org/x/image/draw"
 
 	"github.com/yanchenm/photo-sync/models"
 )
@@ -28,6 +30,10 @@ type GetPhotosParams struct {
 	Start int `json:"start"`
 	Count int `json:"count"`
 }
+
+const (
+	THUMBNAIL_MAX = 600
+)
 
 func uploadToS3(sess *session.Session, bucket, key string, file io.Reader) error {
 	uploader := s3manager.NewUploader(sess)
@@ -52,6 +58,34 @@ func generateSignedUrl(sess *session.Session, bucket, key, fileName string) (str
 	})
 
 	return req.Presign(1 * time.Minute)
+}
+
+func createThumbnail(src image.Image) image.Image {
+	bounds := src.Bounds()
+	width, height := bounds.Dx(), bounds.Dy()
+
+	if width <= THUMBNAIL_MAX && height <= THUMBNAIL_MAX {
+		return src
+	}
+
+	// Cap max dimension at thumbnail max while preserving aspect ratio
+	var thumbWidth, thumbHeight int
+
+	if width > height {
+		aspect := float64(height) / float64(width)
+		thumbWidth = 600
+		thumbHeight = int(math.Max(1.0, math.Floor(float64(thumbWidth)*aspect)))
+	} else {
+		aspect := float64(width) / float64(height)
+		thumbHeight = 600
+		thumbWidth = int(math.Max(1.0, math.Floor(float64(thumbHeight)*aspect)))
+	}
+
+	thumbRect := image.Rect(0, 0, thumbWidth, thumbHeight)
+	thumbnail := image.NewRGBA(thumbRect)
+	draw.BiLinear.Scale(thumbnail, thumbRect, src, bounds, draw.Over, nil)
+
+	return thumbnail
 }
 
 func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user models.User) {
@@ -91,14 +125,14 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 	}
 
 	// Open image
-	img, fileType, err := image.Decode(bytes.NewReader(fileBuffer))
+	img, fileType, err := imageorient.Decode(bytes.NewReader(fileBuffer))
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
 	// Get photo details
-	config, _, err := image.DecodeConfig(bytes.NewReader(fileBuffer))
+	config, _, err := imageorient.DecodeConfig(bytes.NewReader(fileBuffer))
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
@@ -113,10 +147,10 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 	}
 
 	// Create a thumbnail to display on main page
-	thumbnail := resize.Thumbnail(600, 600, img, resize.Bicubic)
-
+	thumbnail := createThumbnail(img)
 	pr, pw := io.Pipe()
 
+	// Spawn new goroutine to write to pipe - otherwise will block indefinitely
 	go func() {
 		jpeg.Encode(pw, thumbnail, &jpeg.Options{Quality: 90})
 		pw.Close()
@@ -197,8 +231,16 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 			return
 		}
 
+		details, err := s.DB.GetDetailForPhoto(photo.ID)
+		if err != nil {
+			msg := fmt.Sprintf("error retrieving details for photo %s", photo.ID)
+			_ = logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
+			return
+		}
+
 		photos.Photos[i].Url = signedUrl
 		photos.Photos[i].ThumbnailUrl = thumbUrl
+		photos.Photos[i].Details = details
 	}
 
 	_ = respondWithJSON(w, http.StatusOK, photos)

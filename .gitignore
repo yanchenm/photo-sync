@@ -3,3 +3,4 @@
 */build/
 api/.env
 client/.eslintcache
+client/package-lock.json
