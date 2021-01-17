@@ -1,12 +1,13 @@
 import React, { ReactElement, useEffect } from 'react';
 import { clearError, tryRefresh } from '../auth/authSlice';
-import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
+import { faBookOpen, faImages, faPlus, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
+import UploadButton from './UploadButton';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
@@ -43,11 +44,14 @@ const HomePage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="flex flex-col items-center w-60 flex-none min-h-screen pl-4 pt-4 pb-4">
         <h1 className="font-default text-4xl font-bold p-4 mb-6">photos</h1>
+        <div className="w-40 mb-10">
+          <UploadButton />
+        </div>
         <div className="flex flex-col items-start">
           <div
             className={`${
               page == 'photos' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } py-3 px-6 rounded cursor-pointer`}
+            } py-3 px-6 rounded cursor-pointer w-full`}
             onClick={() => history.push('/photos')}
           >
             <div className="flex flex-row w-full items-center space-x-6 text-xl">
@@ -58,7 +62,7 @@ const HomePage: React.FC = () => {
           <div
             className={`${
               page == 'albums' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } group py-3 px-6 rounded cursor-pointer group-hover:border group-hover:border-black`}
+            } group py-3 px-6 rounded cursor-pointer w-full`}
             onClick={() => history.push('/albums')}
           >
             <div className="flex flex-row w-full items-center space-x-6 text-xl">
@@ -69,7 +73,7 @@ const HomePage: React.FC = () => {
           <div
             className={`${
               page == 'sharing' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } group py-3 px-6 rounded cursor-pointer group-hover:border group-hover:border-black`}
+            } group py-3 px-6 rounded cursor-pointer w-full`}
             onClick={() => history.push('/sharing')}
           >
             <div className="flex flex-row w-full items-center space-x-6 text-xl">
