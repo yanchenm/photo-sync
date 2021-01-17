@@ -26,9 +26,10 @@ import (
 	"github.com/yanchenm/photo-sync/models"
 )
 
-type GetPhotosParams struct {
-	Start int `json:"start"`
-	Count int `json:"count"`
+type GetPhotosResponse struct {
+	Items   models.PhotoList `json:"items"`
+	HasMore bool             `json:"has_more"`
+	Total   int              `json:"total"`
 }
 
 const (
@@ -193,6 +194,8 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 }
 
 func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user models.User) {
+	res := GetPhotosResponse{}
+
 	start, err := strconv.Atoi(r.FormValue("start"))
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
@@ -202,6 +205,19 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 	count, err := strconv.Atoi(r.FormValue("count"))
 	if err != nil {
 		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
+	}
+
+	total, err := s.DB.GetNumPhotos(user)
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
+		return
+	}
+
+	res.Total = total
+	if total > start+count {
+		res.HasMore = true
+	} else {
+		res.HasMore = false
 	}
 
 	photos, err := s.DB.GetPhotos(user, start, count)
@@ -243,7 +259,8 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 		photos.Photos[i].Details = details
 	}
 
-	_ = respondWithJSON(w, http.StatusOK, photos)
+	res.Items = *photos
+	_ = respondWithJSON(w, http.StatusOK, res)
 }
 
 func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user models.User) {

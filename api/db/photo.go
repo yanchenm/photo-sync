@@ -31,6 +31,20 @@ func (db Database) GetPhotos(user models.User, start, count int) (*models.PhotoL
 	return res, nil
 }
 
+func (db Database) GetNumPhotos(user models.User) (int, error) {
+	var count int
+
+	query := `SELECT COUNT(*) FROM photos WHERE username = $1;`
+	row := db.Conn.QueryRow(query, user.Email)
+
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (db Database) GetPhotoById(id string) (models.Photo, error) {
 	photo := models.Photo{}
 	query := `SELECT * FROM photos WHERE id = $1;`
