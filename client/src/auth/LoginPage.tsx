@@ -1,6 +1,6 @@
 import { Link, useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { clearError, tryRefresh, trySignIn } from './authSlice';
+import { clearError, trySignIn } from './authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Alert from '../common/Alert';

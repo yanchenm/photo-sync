@@ -40,7 +40,7 @@ func Initialize(username, password, database string) (*Server, error) {
 
 func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/api/users/new", s.handleAddUser).Methods("POST")
-	s.Router.HandleFunc("/api/photos/new", s.authenticate(s.handleUploadPhoto)).Methods("POST")
+	s.Router.HandleFunc("/api/photos", s.authenticate(s.handleUploadPhoto)).Methods("POST")
 	s.Router.HandleFunc("/api/photos", s.authenticate(s.handleGetPhotos)).Methods("GET")
 	s.Router.HandleFunc("/api/photos/{id}", s.authenticate(s.handleGetPhotoByID)).Methods("GET")
 	s.Router.HandleFunc("/api/photos/{id}", s.authenticate(s.handleDeletePhoto)).Methods("DELETE")

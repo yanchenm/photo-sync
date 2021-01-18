@@ -1,13 +1,14 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { clearError, tryRefresh } from '../auth/authSlice';
-import { faBookOpen, faImages, faPlus, faShareSquare } from '@fortawesome/free-solid-svg-icons';
+import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
-import UploadButton from './UploadButton';
+import UploadButton from '../uploads/UploadButton';
+import UploadWindow from '../uploads/UploadWindow';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
@@ -24,6 +25,8 @@ const renderPage = (page: PageName): ReactElement => {
 
 const HomePage: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
+  const uploadState = useSelector((state: RootState) => state.upload);
+  const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -37,6 +40,10 @@ const HomePage: React.FC = () => {
     if (authState.error) {
       dispatch(clearError());
       history.push('/login');
+    }
+
+    if (uploadState.uploading) {
+      setUploadWindowVisible(true);
     }
   });
 
@@ -84,6 +91,12 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       <div style={{ flex: 1 }}>{renderPage(page)}</div>
+      <UploadWindow
+        visible={uploadWindowVisible}
+        header="Uploading Photos..."
+        status={{}}
+        onClose={() => setUploadWindowVisible(false)}
+      />
     </div>
   );
 };

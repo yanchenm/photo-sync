@@ -58,7 +58,7 @@ func generateSignedUrl(sess *session.Session, bucket, key, fileName string) (str
 		ResponseContentDisposition: aws.String(fileNameParam),
 	})
 
-	return req.Presign(1 * time.Minute)
+	return req.Presign(15 * time.Minute)
 }
 
 func createThumbnail(src image.Image) image.Image {

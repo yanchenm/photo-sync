@@ -5,7 +5,6 @@ import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotoCard from './PhotoCard';
-import PhotoDetails from './PhotoDetails';
 import { RootState } from '../store';
 import { useSelector } from 'react-redux';
 
@@ -50,9 +49,12 @@ const PhotosPage: React.FC = () => {
     src: photo.thumbnail_url,
     height: photo.details.height,
     width: photo.details.width,
+    key: photo.id,
   }));
 
-  const imageRenderer = ({ index, photo }: RenderImageProps) => <PhotoCard index={index} photo={photo} />;
+  const imageRenderer = ({ index, photo }: RenderImageProps) => (
+    <PhotoCard index={index} key={photo.key} photo={photo} />
+  );
 
   const onPageChangeSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
