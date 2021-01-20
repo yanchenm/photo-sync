@@ -12,9 +12,9 @@ type UploadWindowProps = {
 
 const UploadWindow: React.FC<UploadWindowProps> = ({ visible, header, status, onClose }: UploadWindowProps) => {
   return (
-    <div className="fixed bottom-0 right-0">
+    <div className="fixed bottom-0 right-0 w-1/4">
       <div className="p-10">
-        <div className="bg-white rounded-md shadow px-9 py-4 max-w-sm" role="alert">
+        <div className="bg-white rounded-md shadow px-9 py-4" role="alert">
           <button
             className="px-n7 py-n4 ml-auto bg-transparent border-0 opacity-6 float-right text-xl leading-none font-semibold outline-none focus:outline-none"
             onClick={onClose}

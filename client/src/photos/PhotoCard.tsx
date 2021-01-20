@@ -1,18 +1,21 @@
-import { PhotoProps } from 'react-photo-gallery';
 import React from 'react';
 
 type PhotoCardProps = {
-  index: number;
-  photo: PhotoProps;
+  left: number;
+  top: number;
+  height: number;
+  width: number;
+  src: string;
+  alt: string;
 };
 
-const PhotoCard: React.FC<PhotoCardProps> = ({ photo }: PhotoCardProps) => {
+const PhotoCard: React.FC<PhotoCardProps> = ({ left, top, height, width, alt, src }: PhotoCardProps) => {
   return (
     <div
-      className="overflow-hidden rounded shadow-lg"
-      style={{ cursor: 'pointer', height: photo.height, width: photo.width, margin: '2px' }}
+      style={{ cursor: 'pointer', position: 'absolute', left: left, top: top, height: height, width: width }}
+      className="overflow-hidden shadow rounded"
     >
-      <img alt={photo.alt} className="block h-auto w-full" src={photo.src}></img>
+      <img alt={alt} src={src} />
     </div>
   );
 };

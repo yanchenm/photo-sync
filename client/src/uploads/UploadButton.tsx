@@ -53,18 +53,18 @@ const UploadButton: React.FC = () => {
 
   return (
     <div>
-      <button
-        type="button"
-        ref={uploadButtonRef}
-        onClick={() => setShowPopper(!showPopper)}
-        className="flex flex-row items-center group relative w-full justify-center py-2 px-4 border border-transparent text-xl font-default font-medium rounded-md text-emerald-500 border-emerald-500 focus:outline-none hover:border-emerald-400 hover:text-emerald-400"
-      >
-        <FontAwesomeIcon icon={faPlus} className="mr-3" />
-        New
-      </button>
+      <OutsideClickHandler onOutsideClick={() => setShowPopper(false)}>
+        <button
+          type="button"
+          ref={uploadButtonRef}
+          onClick={() => setShowPopper(!showPopper)}
+          className="flex flex-row items-center group relative w-full justify-center py-2 px-4 border border-transparent text-xl font-default font-medium rounded-md text-emerald-500 border-emerald-500 focus:outline-none hover:border-emerald-400 hover:text-emerald-400"
+        >
+          <FontAwesomeIcon icon={faPlus} className="mr-3" />
+          New
+        </button>
 
-      {showPopper ? (
-        <OutsideClickHandler onOutsideClick={() => setShowPopper(false)}>
+        {showPopper ? (
           <div ref={popperRef} style={styles.popper} {...attributes.popper} className="p-4 bg-white shadow rounded">
             <div ref={setArrowRef} />
             <input
@@ -88,8 +88,8 @@ const UploadButton: React.FC = () => {
               </div>
             </div>
           </div>
-        </OutsideClickHandler>
-      ) : null}
+        ) : null}
+      </OutsideClickHandler>
     </div>
   );
 };

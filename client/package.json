@@ -19,12 +19,12 @@
     "@types/react-dom": "^16.9.10",
     "autoprefixer": "^9.8.6",
     "axios": "^0.21.0",
+    "justified-layout": "^4.1.0",
     "postcss": "^7.0.35",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-hook-form": "^6.14.0",
     "react-outside-click-handler": "^1.3.0",
-    "react-photo-gallery": "^8.0.0",
     "react-popper": "^2.2.4",
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
@@ -59,6 +59,7 @@
     ]
   },
   "devDependencies": {
+    "@types/justified-layout": "^4.0.0",
     "@types/react-outside-click-handler": "^1.3.0",
     "@types/react-redux": "^7.1.15",
     "@types/react-router-dom": "^5.1.7",
