@@ -23,6 +23,7 @@ const PhotosPage: React.FC = () => {
   const containerRef = useRef() as MutableRefObject<HTMLDivElement>;
 
   useEffect(() => {
+    setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0);
     window.addEventListener('resize', () =>
       setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0),
     );

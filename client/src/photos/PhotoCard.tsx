@@ -13,9 +13,9 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ left, top, height, width, alt, sr
   return (
     <div
       style={{ cursor: 'pointer', position: 'absolute', left: left, top: top, height: height, width: width }}
-      className="overflow-hidden shadow rounded"
+      className="flex shadow rounded overflow-hidden items-center justify-center"
     >
-      <img alt={alt} src={src} />
+      <img alt={alt} src={src} className="min-w-full min-h-full" />
     </div>
   );
 };
