@@ -18,6 +18,11 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+type LoginResponse struct {
+	Token string      `json:"token"`
+	User  models.User `json:"user"`
+}
+
 func generateToken(email, key string, expiry time.Time) (string, error) {
 	claims := &Claims{
 		Email: email,
@@ -114,13 +119,19 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to register new token", err)
 	}
 
+	dbUser.BeforeSend()
+	response := LoginResponse{
+		Token: accessTokenString,
+		User:  dbUser,
+	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh",
 		Value:    refreshTokenString,
 		Expires:  refreshTokenExpiration,
 		HttpOnly: true,
 	})
-	_ = respondWithJSON(w, http.StatusOK, map[string]string{"token": accessTokenString})
+	_ = respondWithJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
@@ -187,13 +198,25 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := s.DB.GetUserFromEmail(claims.Email)
+	if err != nil {
+		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user", err)
+		return
+	}
+
+	user.BeforeSend()
+	response := LoginResponse{
+		Token: accessTokenString,
+		User:  user,
+	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh",
 		Value:    newRefreshTokenString,
 		Expires:  refreshTokenExpiration,
 		HttpOnly: true,
 	})
-	_ = respondWithJSON(w, http.StatusOK, map[string]string{"token": accessTokenString})
+	_ = respondWithJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request, user models.User) {

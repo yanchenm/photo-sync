@@ -20,7 +20,7 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 
 	if user.Email == "" || user.Name == "" || user.Password == "" {
 		fields := []string{"email", "name", "password"}
-		missing := []string{}
+		var missing []string
 
 		for _, field := range fields {
 			if r.FormValue(field) == "" {
