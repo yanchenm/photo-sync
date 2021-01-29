@@ -30,7 +30,7 @@ apiWithAuth.interceptors.response.use(
     const originalRequest = error.config;
 
     // If not authorized error and we haven't tried refreshing yet
-    if (error.response.status === 403 && !originalRequest._retry) {
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       store.dispatch(tryRefresh());
       return apiWithAuth(originalRequest);

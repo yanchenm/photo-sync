@@ -1,5 +1,4 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { RootState, store } from '../store';
 import { clearError, tryRefresh } from '../auth/authSlice';
 import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,8 +6,10 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
+import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
+import { clearUploads } from '../uploads/uploadSlice';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
@@ -26,11 +27,15 @@ const renderPage = (page: PageName): ReactElement => {
 const HomePage: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
   const uploadState = useSelector((state: RootState) => state.upload);
-  const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
+  const [uploadWindowVisible, setUploadWindowVisible] = useState(true);
 
   const dispatch = useDispatch();
   const history = useHistory();
   const { page } = useParams<PageParamType>();
+
+  useEffect(() => {
+    dispatch(clearUploads());
+  }, []);
 
   useEffect(() => {
     if (!authState.signedIn && !authState.error) {
@@ -49,7 +54,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-row">
-      <div className="flex flex-col items-center w-60 flex-none min-h-screen pl-4 pt-4 pb-4">
+      <div className="flex flex-col items-center w-60 flex-none min-h-screen pl-4 pt-4 pb-4 z-50">
         <h1 className="font-default text-4xl font-bold p-4 mb-6">photos</h1>
         <div className="w-40 mb-10">
           <UploadButton />
