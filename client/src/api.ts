@@ -1,14 +1,8 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 axios.defaults.withCredentials = true;
 
-export const getAuthorizationHeader = (accessToken: string): AxiosRequestConfig => {
-  return {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-};
-
-export default axios.create({
+export const api = axios.create({
   baseURL: 'http://localhost:8080/api',
   timeout: 5000,
 });

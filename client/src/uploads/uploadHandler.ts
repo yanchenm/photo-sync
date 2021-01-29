@@ -1,11 +1,11 @@
-import api, { getAuthorizationHeader } from '../api';
+import { apiWithAuth } from '../apiWithAuth';
 
 export const uploadPhoto = async (accessToken: string, file: File): Promise<boolean> => {
   const formData = new FormData();
   formData.append('photo', file);
 
   try {
-    const res = await api.post('/photos', formData, getAuthorizationHeader(accessToken));
+    const res = await apiWithAuth.post('/photos', formData);
     return res.status === 200;
   } catch (err) {
     return false;

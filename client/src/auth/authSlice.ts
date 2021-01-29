@@ -1,8 +1,8 @@
 import { Credentials, refreshAuth, signIn, signOut } from './authHandler';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { User, getAuthenticatedUser } from '../users/userHandler';
 
 import { AppThunk } from '../store';
+import { User } from '../users/userHandler';
 
 type AuthState = {
   signedIn: boolean;
@@ -62,19 +62,16 @@ export const { signInSuccessful, signInFailed, signOutSuccessful, signOutFailed,
 export default authSlice.reducer;
 
 export const trySignIn = (credentials: Credentials): AppThunk => async (dispatch) => {
-  let accessToken, user;
+  let accessToken: string, user: User;
   try {
-    accessToken = await signIn(credentials);
-    if (accessToken == null) {
+    const response = await signIn(credentials);
+    if (response == null) {
       dispatch(signInFailed());
       return;
     }
 
-    user = await getAuthenticatedUser(accessToken);
-    if (user == null) {
-      dispatch(signInFailed());
-      return;
-    }
+    accessToken = response.token;
+    user = response.user;
   } catch (err) {
     dispatch(signInFailed());
     return;
@@ -84,19 +81,16 @@ export const trySignIn = (credentials: Credentials): AppThunk => async (dispatch
 };
 
 export const tryRefresh = (): AppThunk => async (dispatch) => {
-  let accessToken, user;
+  let accessToken: string, user: User;
   try {
-    accessToken = await refreshAuth();
-    if (accessToken == null) {
+    const response = await refreshAuth();
+    if (response == null) {
       dispatch(signInFailed());
       return;
     }
 
-    user = await getAuthenticatedUser(accessToken);
-    if (user == null) {
-      dispatch(signInFailed());
-      return;
-    }
+    accessToken = response.token;
+    user = response.user;
   } catch (err) {
     dispatch(signInFailed());
     return;

@@ -1,4 +1,4 @@
-import api, { getAuthorizationHeader } from '../api';
+import { apiWithAuth } from '../apiWithAuth';
 
 export type Photo = {
   id: string;
@@ -36,7 +36,7 @@ export const getPhotos = async (
   count: number,
 ): Promise<GetPhotosResponse | null> => {
   try {
-    const res = await api.get(`/photos?start=${start}&count=${count}`, getAuthorizationHeader(accessToken));
+    const res = await apiWithAuth.get(`/photos?start=${start}&count=${count}`);
     if (res.status !== 200) {
       return null;
     }

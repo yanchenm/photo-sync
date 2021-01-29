@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
+import { RootState, store } from '../store';
 import { clearError, tryRefresh } from '../auth/authSlice';
 import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,7 +7,6 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
-import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
 

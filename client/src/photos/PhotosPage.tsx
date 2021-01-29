@@ -24,9 +24,11 @@ const PhotosPage: React.FC = () => {
 
   useEffect(() => {
     setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0);
-    window.addEventListener('resize', () =>
-      setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0),
-    );
+
+    const handleWindowResize = () => setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0);
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => window.removeEventListener('resize', handleWindowResize);
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,5 @@
-import api from '../api';
+import { api } from '../api';
+import { apiWithAuth } from '../apiWithAuth';
 
 export type SignUpData = {
   name: string;
@@ -20,13 +21,9 @@ export const addNewUser = async (newUserData: SignUpData): Promise<boolean> => {
   }
 };
 
-export const getAuthenticatedUser = async (accessToken: string): Promise<User | null> => {
-  const config = {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-
+export const getAuthenticatedUser = async (): Promise<User | null> => {
   try {
-    const res = await api.get('/user', config);
+    const res = await apiWithAuth.get('/user');
     if (res.status !== 200) {
       return null;
     }
