@@ -1,12 +1,22 @@
 version: "3.7"
 services:
+  caddy:
+    image: caddy:2.2.1-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - $HOME/docker/volumes/caddy:/data
+
   database:
-    image: postgres
+    image: postgres:13-alpine
     restart: always
     env_file:
       - .env
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/data
     healthcheck:
@@ -26,5 +36,5 @@ services:
         condition: service_healthy
     networks:
       - default
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
