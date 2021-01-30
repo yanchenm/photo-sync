@@ -1,8 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { AppThunk } from '../store';
-import { uploadPhoto } from './uploadHandler';
-
 type UploadStatus = 'uploading' | 'completed' | 'error';
 
 type UploadState = {
@@ -73,20 +70,3 @@ const uploadSlice = createSlice({
 export const { uploadStarted, uploadFinished, uploadFailed, clearUploads, setClosed } = uploadSlice.actions;
 
 export default uploadSlice.reducer;
-
-export const startUpload = (file: File): AppThunk => async (dispatch) => {
-  try {
-    dispatch(uploadStarted(file.name));
-
-    const status = await uploadPhoto(file);
-    if (!status) {
-      dispatch(uploadFailed(file.name));
-      return;
-    }
-  } catch (err) {
-    dispatch(uploadFailed(file.name));
-    return;
-  }
-
-  dispatch(uploadFinished(file.name));
-};

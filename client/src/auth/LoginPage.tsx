@@ -1,11 +1,11 @@
+import { Credentials, trySignIn } from './authHandler';
 import { Link, useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { clearError, trySignIn } from './authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Alert from '../common/Alert';
-import { Credentials } from './authHandler';
 import { RootState } from '../store';
+import { clearError } from './authSlice';
 import { useForm } from 'react-hook-form';
 
 const LoginPage: React.FC = () => {

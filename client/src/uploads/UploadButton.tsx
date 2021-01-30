@@ -3,7 +3,7 @@ import { faCloudUploadAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import OutsideClickHandler from 'react-outside-click-handler';
-import { startUpload } from './uploadSlice';
+import { startUpload } from './uploadHandler';
 import { useDispatch } from 'react-redux';
 import { usePopper } from 'react-popper';
 

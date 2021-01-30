@@ -1,5 +1,4 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { clearError, tryRefresh } from '../auth/authSlice';
 import { clearUploads, setClosed } from '../uploads/uploadSlice';
 import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +9,8 @@ import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
+import { clearError } from '../auth/authSlice';
+import { tryRefresh } from '../auth/authHandler';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
