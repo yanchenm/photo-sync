@@ -40,13 +40,13 @@ func (s *Server) authenticate(next func(http.ResponseWriter, *http.Request, mode
 		// Read bearer token
 		tokens, ok := r.Header["Authorization"]
 		if !ok {
-			_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+			respondWithJSON(w, http.StatusUnauthorized, nil)
 			return
 		}
 
 		token := strings.TrimPrefix(tokens[0], "Bearer ")
 		if token == "" {
-			_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+			respondWithJSON(w, http.StatusUnauthorized, nil)
 			return
 		}
 
@@ -60,7 +60,7 @@ func (s *Server) authenticate(next func(http.ResponseWriter, *http.Request, mode
 		})
 
 		if err != nil || !accessToken.Valid {
-			_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+			respondWithJSON(w, http.StatusUnauthorized, nil)
 			return
 		}
 
@@ -72,25 +72,25 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
 		return
 	}
 
 	defer r.Body.Close()
 
 	if user.Email == "" || user.Password == "" {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "missing required values", nil)
+		logErrorAndRespond(w, http.StatusBadRequest, "missing required values", nil)
 		return
 	}
 
 	dbUser, err := s.DB.GetUserFromEmail(user.Email)
 	if err != nil {
-		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+		respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
 	if !dbUser.VerifyPassword(user.Password) {
-		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+		respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -98,7 +98,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	accessTokenString, err := generateToken(user.Email, os.Getenv("ACCESS_TOKEN_KEY"), accessTokenExpiration)
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	refreshTokenString, err := generateToken(user.Email, os.Getenv("REFRESH_TOKEN_KEY"), refreshTokenExpiration)
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to register new token", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to register new token", err)
 	}
 
 	dbUser.BeforeSend()
@@ -131,13 +131,13 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		Expires:  refreshTokenExpiration,
 		HttpOnly: true,
 	})
-	_ = respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("refresh")
 	if err != nil {
-		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+		respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -158,7 +158,7 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil || !refreshToken.Valid || isRevoked {
-		_ = respondWithJSON(w, http.StatusUnauthorized, nil)
+		respondWithJSON(w, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -166,7 +166,7 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	accessTokenString, err := generateToken(claims.Email, os.Getenv("ACCESS_TOKEN_KEY"), accessTokenExpiration)
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
 		return
 	}
 
@@ -174,7 +174,7 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	newRefreshTokenString, err := generateToken(claims.Email, os.Getenv("REFRESH_TOKEN_KEY"), refreshTokenExpiration)
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get tokens", err)
 		return
 	}
 
@@ -184,7 +184,7 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to remove old token", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to remove old token", err)
 		return
 	}
 
@@ -194,13 +194,13 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to register new token", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to register new token", err)
 		return
 	}
 
 	user, err := s.DB.GetUserFromEmail(claims.Email)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user", err)
 		return
 	}
 
@@ -216,13 +216,13 @@ func (s *Server) refreshAuth(w http.ResponseWriter, r *http.Request) {
 		Expires:  refreshTokenExpiration,
 		HttpOnly: true,
 	})
-	_ = respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request, user models.User) {
 	c, err := r.Cookie("refresh")
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "no refresh token received", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "no refresh token received", err)
 		return
 	}
 
@@ -234,7 +234,7 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request, user models.User
 
 	// Invalidate the refresh token
 	if err := s.DB.DeleteToken(refreshToken); err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to unregister token", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to unregister token", err)
 		return
 	}
 
@@ -244,5 +244,5 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request, user models.User
 		MaxAge:   0,
 		HttpOnly: true,
 	})
-	_ = respondWithJSON(w, http.StatusOK, nil)
+	respondWithJSON(w, http.StatusOK, nil)
 }

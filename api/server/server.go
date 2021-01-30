@@ -39,20 +39,27 @@ func Initialize(username, password, database string) (*Server, error) {
 }
 
 func (s *Server) initializeRoutes() {
-	s.Router.HandleFunc("/api/users/new", s.handleAddUser).Methods("POST")
-	s.Router.HandleFunc("/api/photos", s.authenticate(s.handleUploadPhoto)).Methods("POST")
-	s.Router.HandleFunc("/api/photos", s.authenticate(s.handleGetPhotos)).Methods("GET")
-	s.Router.HandleFunc("/api/photos/{id}", s.authenticate(s.handleGetPhotoByID)).Methods("GET")
-	s.Router.HandleFunc("/api/photos/{id}", s.authenticate(s.handleDeletePhoto)).Methods("DELETE")
-	s.Router.HandleFunc("/api/login", s.login).Methods("POST")
-	s.Router.HandleFunc("/api/logout", s.authenticate(s.logout)).Methods("POST")
-	s.Router.HandleFunc("/api/refresh", s.refreshAuth).Methods("POST")
-	s.Router.HandleFunc("/api/user", s.authenticate(s.handleGetAuthenticatedUser)).Methods("GET")
+	s.Router.HandleFunc("/users/new", s.handleAddUser).Methods("POST")
+	s.Router.HandleFunc("/photos", s.authenticate(s.handleUploadPhoto)).Methods("POST")
+	s.Router.HandleFunc("/photos", s.authenticate(s.handleGetPhotos)).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.authenticate(s.handleGetPhotoByID)).Methods("GET")
+	s.Router.HandleFunc("/photos/{id}", s.authenticate(s.handleDeletePhoto)).Methods("DELETE")
+	s.Router.HandleFunc("/login", s.login).Methods("POST")
+	s.Router.HandleFunc("/logout", s.authenticate(s.logout)).Methods("POST")
+	s.Router.HandleFunc("/refresh", s.refreshAuth).Methods("POST")
+	s.Router.HandleFunc("/user", s.authenticate(s.handleGetAuthenticatedUser)).Methods("GET")
 }
 
 func (s *Server) Run(addr string) {
+	var frontendUrl string
+	if os.Getenv("ENVIRONMENT") == "PROD" {
+		frontendUrl = "https://photos.runny.cloud"
+	} else {
+		frontendUrl = "http://localhost:3000"
+	}
+
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{frontendUrl},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 		Debug:            true,
@@ -64,26 +71,21 @@ func (s *Server) Run(addr string) {
 	defer s.DB.Conn.Close()
 }
 
-func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) error {
-	response, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
+func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) {
+	response, _ := json.Marshal(payload)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_, err = w.Write(response)
-
-	return err
+	_, _ = w.Write(response)
 }
 
-func respondWithError(w http.ResponseWriter, status int, message string) error {
-	return respondWithJSON(w, status, map[string]string{"error": message})
+func respondWithError(w http.ResponseWriter, status int, message string) {
+	respondWithJSON(w, status, map[string]string{"error": message})
 }
 
-func logErrorAndRespond(w http.ResponseWriter, status int, message string, err error) error {
+func logErrorAndRespond(w http.ResponseWriter, status int, message string, err error) {
 	log.Error(fmt.Sprintf("%s: %s", message, err))
-	return respondWithError(w, status, message)
+	respondWithError(w, status, message)
 }
 
 func getNewAWSSession(region string) (*session.Session, error) {

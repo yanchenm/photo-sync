@@ -1,0 +1,9 @@
+caddy:
+  image: caddy:2.2.1-alpine
+  restart: unless-stopped
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - $PWD/Caddyfile:/etc/caddy/Caddyfile
+    - $HOME/docker/volumes/caddy:/data

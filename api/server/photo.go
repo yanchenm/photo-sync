@@ -96,14 +96,14 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 
 	// Set max photo size to 10MB
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "failed to parse form", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "failed to parse form", err)
 		return
 	}
 
 	// Get photo from request body
 	file, header, err := r.FormFile("photo")
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid file upload", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid file upload", err)
 		return
 	}
 
@@ -121,21 +121,21 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 	fileBuffer := buffer.Bytes()
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
 	// Open image
 	img, fileType, err := imageorient.Decode(bytes.NewReader(fileBuffer))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
 	// Get photo details
 	config, _, err := imageorient.DecodeConfig(bytes.NewReader(fileBuffer))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid image file", err)
 		return
 	}
 
@@ -160,19 +160,19 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 	// Upload image and thumbnail to S3
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to initialize AWS session", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to initialize AWS session", err)
 		return
 	}
 
 	err = uploadToS3(sess, os.Getenv("S3_BUCKET"), id+"."+fileType, bytes.NewReader(fileBuffer))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
 		return
 	}
 
 	err = uploadToS3(sess, os.Getenv("S3_BUCKET"), id+"_thumb.jpeg", pr)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to upload to S3", err)
 		return
 	}
 
@@ -180,17 +180,17 @@ func (s *Server) handleUploadPhoto(w http.ResponseWriter, r *http.Request, user 
 	photo.Thumbnail = id + "_thumb.jpeg"
 
 	if err := s.DB.AddPhoto(&photo); err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo to database", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo to database", err)
 		return
 	}
 
 	photo.Details = detail
 
 	if err := s.DB.AddDetail(&detail); err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo details to database", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to add photo details to database", err)
 		return
 	}
-	_ = respondWithJSON(w, http.StatusOK, photo)
+	respondWithJSON(w, http.StatusOK, photo)
 }
 
 func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user models.User) {
@@ -198,18 +198,18 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 
 	start, err := strconv.Atoi(r.FormValue("start"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
 		return
 	}
 
 	count, err := strconv.Atoi(r.FormValue("count"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid request parameters", err)
 	}
 
 	total, err := s.DB.GetNumPhotos(user)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
 		return
 	}
 
@@ -222,13 +222,13 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 
 	photos, err := s.DB.GetPhotos(user, start, count)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photos from database", err)
 		return
 	}
 
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to establish AWS session", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "unable to establish AWS session", err)
 		return
 	}
 
@@ -236,21 +236,21 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 		signedUrl, err := generateSignedUrl(sess, os.Getenv("S3_BUCKET"), photo.Key, photo.Filename)
 		if err != nil {
 			msg := fmt.Sprintf("error signing url for photo %s", photo.ID)
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
+			logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
 			return
 		}
 
 		thumbUrl, err := generateSignedUrl(sess, os.Getenv("S3_BUCKET"), photo.Thumbnail, photo.Thumbnail+".jpeg")
 		if err != nil {
 			msg := fmt.Sprintf("error signing url for thumbnail %s", photo.ID)
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
+			logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
 			return
 		}
 
 		details, err := s.DB.GetDetailForPhoto(photo.ID)
 		if err != nil {
 			msg := fmt.Sprintf("error retrieving details for photo %s", photo.ID)
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
+			logErrorAndRespond(w, http.StatusInternalServerError, msg, err)
 			return
 		}
 
@@ -260,7 +260,7 @@ func (s *Server) handleGetPhotos(w http.ResponseWriter, r *http.Request, user mo
 	}
 
 	res.Items = *photos
-	_ = respondWithJSON(w, http.StatusOK, res)
+	respondWithJSON(w, http.StatusOK, res)
 }
 
 func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user models.User) {
@@ -271,16 +271,16 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user
 	if err != nil {
 		switch err.Error() {
 		case "no matching record":
-			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
 			return
 		default:
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
+			logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
 			return
 		}
 	}
 
 	if photo.User != user.Email {
-		_ = respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
+		respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
 		return
 	}
 
@@ -288,30 +288,30 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user
 	if err != nil {
 		switch err.Error() {
 		case "no matching record":
-			_ = logErrorAndRespond(w, http.StatusNotFound, "photo details do not exist", err)
+			logErrorAndRespond(w, http.StatusNotFound, "photo details do not exist", err)
 			return
 		default:
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo details", err)
+			logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo details", err)
 			return
 		}
 	}
 
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to establish AWS session", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "unable to establish AWS session", err)
 		return
 	}
 
 	signedUrl, err := generateSignedUrl(sess, os.Getenv("S3_BUCKET"), photo.Key, photo.Filename)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "error signing url for photo", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "error signing url for photo", err)
 		return
 	}
 
 	photo.Url = signedUrl
 	photo.Details = detail
 
-	_ = respondWithJSON(w, http.StatusOK, photo)
+	respondWithJSON(w, http.StatusOK, photo)
 }
 
 func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user models.User) {
@@ -322,23 +322,23 @@ func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user 
 	if err != nil {
 		switch err.Error() {
 		case "no matching record":
-			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
 			return
 		default:
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
+			logErrorAndRespond(w, http.StatusInternalServerError, "failed to get photo", err)
 			return
 		}
 	}
 
 	if photo.User != user.Email {
-		_ = respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
+		respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
 		return
 	}
 
 	// Remove photo from S3
 	sess, err := getNewAWSSession(os.Getenv("AWS_REGION"))
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to establish AWS session", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to establish AWS session", err)
 		return
 	}
 
@@ -349,7 +349,7 @@ func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user 
 	})
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
 		return
 	}
 
@@ -359,20 +359,20 @@ func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user 
 	})
 
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "unable to delete photo", err)
 		return
 	}
 
 	if err := s.DB.DeletePhoto(id); err != nil {
 		switch err.Error() {
 		case "no matching record":
-			_ = logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
+			logErrorAndRespond(w, http.StatusNotFound, "photo does not exist", err)
 			return
 		default:
-			_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to delete photo", err)
+			logErrorAndRespond(w, http.StatusInternalServerError, "failed to delete photo", err)
 			return
 		}
 	}
 
-	_ = respondWithJSON(w, http.StatusOK, nil)
+	respondWithJSON(w, http.StatusOK, nil)
 }

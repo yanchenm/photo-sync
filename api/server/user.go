@@ -12,7 +12,7 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
+		logErrorAndRespond(w, http.StatusBadRequest, "invalid request payload", err)
 		return
 	}
 
@@ -28,31 +28,31 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		_ = logErrorAndRespond(w, http.StatusBadRequest, "missing required fields", fmt.Errorf("%v", missing))
+		logErrorAndRespond(w, http.StatusBadRequest, "missing required fields", fmt.Errorf("%v", missing))
 		return
 	}
 
 	if err := user.HashPassword(); err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to process password", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to process password", err)
 		return
 	}
 
 	if err := s.DB.AddUser(&user); err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to create user", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to create user", err)
 		return
 	}
 
 	user.BeforeSend()
-	_ = respondWithJSON(w, http.StatusCreated, user)
+	respondWithJSON(w, http.StatusCreated, user)
 }
 
 func (s *Server) handleGetAuthenticatedUser(w http.ResponseWriter, r *http.Request, authUser models.User) {
 	user, err := s.DB.GetUserFromEmail(authUser.Email)
 	if err != nil {
-		_ = logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user details", err)
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user details", err)
 		return
 	}
 
 	user.BeforeSend()
-	_ = respondWithJSON(w, http.StatusOK, user)
+	respondWithJSON(w, http.StatusOK, user)
 }
