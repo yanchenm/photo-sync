@@ -1,4 +1,4 @@
-api.photos.runny.cloud
-tls yanchenm@gmail.com
-
-reverse_proxy 127.0.0.1:8080
+api.photos.runny.cloud {
+    tls yanchenm@gmail.com
+    reverse_proxy server:8080
+}
