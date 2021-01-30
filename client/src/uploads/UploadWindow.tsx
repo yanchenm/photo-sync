@@ -3,17 +3,17 @@ import { faCheckCircle, faTimes, faTimesCircle } from '@fortawesome/free-solid-s
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import { RootState } from '../store';
-import { UploadStatus } from './uploadSlice';
 import { useSelector } from 'react-redux';
 
 type UploadWindowProps = {
   visible: boolean;
   header: string;
-  status: { [filename: string]: UploadStatus };
   onClose: () => void;
 };
 
-const UploadWindow: React.FC<UploadWindowProps> = ({ visible, header, status, onClose }: UploadWindowProps) => {
+type UploadStatus = 'uploading' | 'completed' | 'error';
+
+const UploadWindow: React.FC<UploadWindowProps> = ({ visible, onClose }: UploadWindowProps) => {
   const uploadState = useSelector((state: RootState) => state.upload);
 
   const getStatusIcon = (status: UploadStatus) => {
@@ -30,7 +30,7 @@ const UploadWindow: React.FC<UploadWindowProps> = ({ visible, header, status, on
   const uploadElements = Object.keys(uploadState.status).map((file) => {
     return (
       <div className="flex flex-row justify-between mt-2" key={file}>
-        <p className="overflow-hidden truncate">{file}</p>
+        <p className="overflow-hidden truncate font-default">{file}</p>
         <div className="flex flex-none h-6 w-6 items-center justify-center">
           {getStatusIcon(uploadState.status[file])}
         </div>
@@ -43,14 +43,16 @@ const UploadWindow: React.FC<UploadWindowProps> = ({ visible, header, status, on
       {visible && (
         <div className="fixed bottom-0 right-0 w-96">
           <div className="p-10">
-            <div className="bg-white rounded-md shadow-md px-9 py-4" role="alert">
+            <div className="bg-white border rounded-md shadow px-9 py-4" role="alert">
               <button
                 className="px-n7 py-n4 ml-auto bg-transparent border-0 opacity-6 float-right text-xl leading-none font-semibold outline-none focus:outline-none"
                 onClick={onClose}
               >
                 <FontAwesomeIcon icon={faTimes} color="black" />
               </button>
-              <h2 className="font-default font-medium text-black mb-3">{header}</h2>
+              <h2 className="font-default font-medium text-lg text-black mb-4">
+                {uploadState.uploading ? 'Uploading photos...' : 'Upload complete'}
+              </h2>
               <div>{uploadElements}</div>
             </div>
           </div>

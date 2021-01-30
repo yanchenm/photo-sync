@@ -1,6 +1,6 @@
-import { apiWithAuth } from '../apiWithAuth';
+import { apiWithAuth } from '../api';
 
-export const uploadPhoto = async (accessToken: string, file: File): Promise<boolean> => {
+export const uploadPhoto = async (file: File): Promise<boolean> => {
   const formData = new FormData();
   formData.append('photo', file);
 

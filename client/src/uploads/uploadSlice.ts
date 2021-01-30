@@ -3,16 +3,18 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { AppThunk } from '../store';
 import { uploadPhoto } from './uploadHandler';
 
-export type UploadStatus = 'uploading' | 'completed' | 'error';
+type UploadStatus = 'uploading' | 'completed' | 'error';
 
 type UploadState = {
   uploading: boolean;
+  closed: boolean;
   status: { [filename: string]: UploadStatus };
   numUploading: number;
 };
 
 const initialState = {
   uploading: false,
+  closed: true,
   status: {},
   numUploading: 0,
 } as UploadState;
@@ -22,6 +24,11 @@ const uploadSlice = createSlice({
   initialState,
   reducers: {
     uploadStarted(state, action: PayloadAction<string>) {
+      if (!state.uploading && state.closed) {
+        state.closed = false;
+        state.status = {};
+      }
+
       state.uploading = true;
       state.status = { ...state.status, [action.payload]: 'uploading' };
       state.numUploading++;
@@ -34,6 +41,9 @@ const uploadSlice = createSlice({
       }
       if (state.numUploading === 0) {
         state.uploading = false;
+        if (state.closed) {
+          state.status = {};
+        }
       }
     },
     uploadFailed(state, action: PayloadAction<string>) {
@@ -44,6 +54,9 @@ const uploadSlice = createSlice({
       }
       if (state.numUploading === 0) {
         state.uploading = false;
+        if (state.closed) {
+          state.status = {};
+        }
       }
     },
     clearUploads(state) {
@@ -51,25 +64,21 @@ const uploadSlice = createSlice({
       state.status = {};
       state.numUploading = 0;
     },
+    setClosed(state) {
+      state.closed = true;
+    },
   },
 });
 
-export const { uploadStarted, uploadFinished, uploadFailed, clearUploads } = uploadSlice.actions;
+export const { uploadStarted, uploadFinished, uploadFailed, clearUploads, setClosed } = uploadSlice.actions;
 
 export default uploadSlice.reducer;
 
-export const startUpload = (file: File): AppThunk => async (dispatch, getState) => {
+export const startUpload = (file: File): AppThunk => async (dispatch) => {
   try {
-    const state = getState();
-    const token = state.auth.accessToken;
-
-    if (token == null) {
-      return;
-    }
-
     dispatch(uploadStarted(file.name));
 
-    const status = await uploadPhoto(token, file);
+    const status = await uploadPhoto(file);
     if (!status) {
       dispatch(uploadFailed(file.name));
       return;

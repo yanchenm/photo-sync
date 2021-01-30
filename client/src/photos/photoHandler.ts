@@ -1,4 +1,4 @@
-import { apiWithAuth } from '../apiWithAuth';
+import { apiWithAuth } from '../api';
 
 export type Photo = {
   id: string;

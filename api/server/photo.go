@@ -280,7 +280,7 @@ func (s *Server) handleGetPhotoByID(w http.ResponseWriter, r *http.Request, user
 	}
 
 	if photo.User != user.Email {
-		_ = respondWithError(w, http.StatusUnauthorized, "you don't have permission to view this photo")
+		_ = respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
 		return
 	}
 
@@ -331,7 +331,7 @@ func (s *Server) handleDeletePhoto(w http.ResponseWriter, r *http.Request, user 
 	}
 
 	if photo.User != user.Email {
-		_ = respondWithError(w, http.StatusUnauthorized, "you don't have permission to view this photo")
+		_ = respondWithError(w, http.StatusForbidden, "you don't have permission to view this photo")
 		return
 	}
 

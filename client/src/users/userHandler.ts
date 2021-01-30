@@ -1,5 +1,4 @@
-import { api } from '../api';
-import { apiWithAuth } from '../apiWithAuth';
+import { api, apiWithAuth } from '../api';
 
 export type SignUpData = {
   name: string;

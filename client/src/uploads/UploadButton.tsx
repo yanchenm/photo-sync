@@ -40,7 +40,6 @@ const UploadButton: React.FC = () => {
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log(files);
 
     if (files == null) {
       return;
@@ -72,6 +71,7 @@ const UploadButton: React.FC = () => {
               ref={hiddenFileUploadRef}
               style={{ display: 'none' }}
               accept="image/png, image/jpeg"
+              multiple
               onChange={handleFileUpload}
             />
             <div className="flex flex-col space-y-3">

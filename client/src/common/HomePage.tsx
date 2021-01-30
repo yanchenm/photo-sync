@@ -1,5 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { clearError, tryRefresh } from '../auth/authSlice';
+import { clearUploads, setClosed } from '../uploads/uploadSlice';
 import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
@@ -9,7 +10,6 @@ import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
-import { clearUploads } from '../uploads/uploadSlice';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
@@ -27,11 +27,16 @@ const renderPage = (page: PageName): ReactElement => {
 const HomePage: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
   const uploadState = useSelector((state: RootState) => state.upload);
-  const [uploadWindowVisible, setUploadWindowVisible] = useState(true);
+  const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
   const { page } = useParams<PageParamType>();
+
+  const closeUploadWindow = () => {
+    dispatch(setClosed());
+    setUploadWindowVisible(false);
+  };
 
   useEffect(() => {
     dispatch(clearUploads());
@@ -46,8 +51,10 @@ const HomePage: React.FC = () => {
       dispatch(clearError());
       history.push('/login');
     }
+  });
 
-    if (uploadState.uploading) {
+  useEffect(() => {
+    if (uploadState.uploading && !uploadState.closed) {
       setUploadWindowVisible(true);
     }
   });
@@ -99,12 +106,7 @@ const HomePage: React.FC = () => {
         <div className="flex-1 overflow-y-scroll">{renderPage(page)}</div>
       </div>
 
-      <UploadWindow
-        visible={uploadWindowVisible}
-        header="Uploading Photos..."
-        status={{}}
-        onClose={() => setUploadWindowVisible(false)}
-      />
+      <UploadWindow visible={uploadWindowVisible} header="Uploading Photos..." onClose={() => closeUploadWindow()} />
     </div>
   );
 };
