@@ -2,6 +2,7 @@ import { Redirect, Route, BrowserRouter as Router, Switch } from 'react-router-d
 
 import HomePage from './common/HomePage';
 import LoginPage from './auth/LoginPage';
+import PhotoDetails from './photos/PhotoDetails';
 import React from 'react';
 import SignUpPage from './auth/SignUpPage';
 
@@ -21,6 +22,9 @@ const App: React.FC = () => {
         </Route>
         <Route exact path="/signup">
           <SignUpPage />
+        </Route>
+        <Route exact path="/photos/:id">
+          <PhotoDetails />
         </Route>
         <Route path="/:page">
           <HomePage />

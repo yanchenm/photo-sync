@@ -1,42 +1,65 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { Photo, getPhotoById } from './photoHandler';
+import React, { useEffect, useState } from 'react';
+import { clearError, tryRefresh } from '../auth/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useParams } from 'react-router-dom';
 
-type PhotoDetailsProps = {
-  id?: number;
-  onClose: () => void;
-  show: boolean;
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RootState } from '../store';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+
+type PageParamType = {
+  id: string;
 };
 
-const PhotoDetails: React.FC<PhotoDetailsProps> = ({ id, onClose, show }: PhotoDetailsProps) => {
+const PhotoDetails: React.FC = () => {
+  const { id } = useParams<PageParamType>();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const authState = useSelector((state: RootState) => state.auth);
+  const [photo, setPhoto] = useState<Photo | null>(null);
+
+  useEffect(() => {
+    if (!authState.signedIn && !authState.error) {
+      dispatch(tryRefresh());
+    }
+
+    if (authState.error) {
+      dispatch(clearError());
+      history.push('/login');
+    }
+
+    const fetchPhoto = async () => {
+      const res = await getPhotoById(id);
+      if (res == null) {
+        history.push('/photos');
+      }
+      setPhoto(res);
+    };
+
+    fetchPhoto();
+  });
+
   return (
-    <>
-      {show ? (
-        <>
-          <div
-            className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
-            onClick={onClose}
-          >
-            <div className="relative w-auto my-6 mx-auto max-w-3xl">
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                <div className="flex items-start justify-between rounded-t">
-                  <button
-                    className="p-2 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={onClose}
-                  >
-                    <FontAwesomeIcon icon={faTimes} />
-                  </button>
-                </div>
-                <div className="relative p-6 flex-auto">
-                  <img src="https://picsum.photos/600/400/?random"></img>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
-        </>
-      ) : null}
-    </>
+    <div className="min-h-screen flex flex-row p-6 space-x-3">
+      <div className="w-60 flex-none min-h-screen text-right pr-12 pt-6">
+        <FontAwesomeIcon
+          icon={faArrowLeft}
+          className="text-3xl cursor-pointer hover:text-emerald-400"
+          onClick={() => history.push('/photos')}
+        />
+      </div>
+      <div className="flex-auto max-h-screen">
+        {photo == null ? (
+          <p>Error</p>
+        ) : (
+          <img src={photo.url} className="flex shadow rounded overflow-hidden items-center justify-center" />
+        )}
+      </div>
+      <div className="pl-9 pt-6 w-1/4 flex-none">
+        <h2 className="font-default font-medium text-4xl">{photo?.filename}</h2>
+      </div>
+    </div>
   );
 };
 

@@ -30,13 +30,22 @@ export type GetPhotosResponse = {
   total: number;
 };
 
-export const getPhotos = async (
-  accessToken: string,
-  start: number,
-  count: number,
-): Promise<GetPhotosResponse | null> => {
+export const getPhotos = async (start: number, count: number): Promise<GetPhotosResponse | null> => {
   try {
     const res = await apiWithAuth.get(`/photos?start=${start}&count=${count}`);
+    if (res.status !== 200) {
+      return null;
+    }
+
+    return res.data;
+  } catch (err) {
+    return null;
+  }
+};
+
+export const getPhotoById = async (id: string): Promise<Photo | null> => {
+  try {
+    const res = await apiWithAuth.get(`/photos/${id}`);
     if (res.status !== 200) {
       return null;
     }

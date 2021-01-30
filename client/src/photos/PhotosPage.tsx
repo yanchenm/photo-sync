@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import JustifiedLayout from 'justified-layout';
 import PhotoCard from './PhotoCard';
 import { RootState } from '../store';
+import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const PhotosPage: React.FC = () => {
@@ -22,6 +23,8 @@ const PhotosPage: React.FC = () => {
   const pageInputRef = useRef() as MutableRefObject<HTMLInputElement>;
   const containerRef = useRef() as MutableRefObject<HTMLDivElement>;
 
+  const history = useHistory();
+
   useEffect(() => {
     setContainerWidth(containerRef.current ? containerRef.current.offsetWidth : 0);
 
@@ -34,7 +37,7 @@ const PhotosPage: React.FC = () => {
   useEffect(() => {
     const fetchPhotos = async () => {
       if (authState.accessToken != null) {
-        const photos = await getPhotos(authState.accessToken, (currPage - 1) * pageSize, pageSize);
+        const photos = await getPhotos((currPage - 1) * pageSize, pageSize);
         if (photos != null && photos.items.photos != null) {
           setPhotoList(photos.items.photos);
 
@@ -73,6 +76,7 @@ const PhotosPage: React.FC = () => {
       height={layout.height}
       src={photoList[index].thumbnail_url}
       alt={photoList[index].filename}
+      onClick={() => history.push(`/photos/${photoList[index].id}`)}
     />
   ));
 

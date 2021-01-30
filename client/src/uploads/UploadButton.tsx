@@ -48,6 +48,8 @@ const UploadButton: React.FC = () => {
     for (let i = 0; i < files.length; i++) {
       dispatch(startUpload(files[i]));
     }
+
+    setShowPopper(false);
   };
 
   return (
