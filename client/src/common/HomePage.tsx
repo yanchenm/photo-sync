@@ -30,8 +30,10 @@ const renderPage = (page: PageName): ReactElement => {
 const HomePage: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
   const uploadState = useSelector((state: RootState) => state.upload);
+
   const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
   const [currUser, setCurrUser] = useState<User>();
+  const [initFinished, setInitFinished] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -59,18 +61,19 @@ const HomePage: React.FC = () => {
       }
 
       setCurrUser(user);
+      setInitFinished(true);
     };
     fetchUser();
   }, []);
 
   useEffect(() => {
-    if (authState.error || !authState.signedIn) {
-      dispatch(clearError());
-      history.push('/login');
+    if (initFinished) {
+      if (authState.error || !authState.signedIn) {
+        dispatch(clearError());
+        history.push('/login');
+      }
     }
-  });
 
-  useEffect(() => {
     if (uploadState.uploading && !uploadState.closed) {
       setUploadWindowVisible(true);
     }

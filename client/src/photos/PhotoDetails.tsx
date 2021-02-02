@@ -22,6 +22,7 @@ const PhotoDetails: React.FC = () => {
   const [photo, setPhoto] = useState<Photo>();
   const [author, setAuthor] = useState<string>();
   const [showSpinner, setShowSpinner] = useState(false);
+  const [initFinished, setInitFinished] = useState(false);
 
   const processDate = (date: string): string => {
     const dateObj = new Date(date);
@@ -39,35 +40,36 @@ const PhotoDetails: React.FC = () => {
         dispatch(signInFailed);
         return;
       }
+      setInitFinished(true);
     };
     fetchUser();
 
     const fetchPhoto = async () => {
-      const photoRes = await getPhotoById(id);
-      if (photoRes == null) {
-        history.push('/photos');
-        return;
-      }
+      if (initFinished) {
+        if (authState.error || !authState.signedIn) {
+          dispatch(clearError());
+          history.push('/login');
+        }
 
-      const userRes = await getUserByEmail(photoRes.user);
-      if (userRes == null) {
-        history.push('/photos');
-        return;
-      }
+        const photoRes = await getPhotoById(id);
+        if (photoRes == null) {
+          history.push('/photos');
+          return;
+        }
 
-      setPhoto(photoRes);
-      setAuthor(userRes.name);
+        const userRes = await getUserByEmail(photoRes.user);
+        if (userRes == null) {
+          history.push('/photos');
+          return;
+        }
+
+        setPhoto(photoRes);
+        setAuthor(userRes.name);
+      }
     };
 
     fetchPhoto();
-  }, []);
-
-  useEffect(() => {
-    if (authState.error || !authState.signedIn) {
-      dispatch(clearError());
-      history.push('/login');
-    }
-  });
+  }, [initFinished]);
 
   return (
     <>
