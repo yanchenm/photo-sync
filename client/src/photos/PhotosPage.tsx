@@ -15,7 +15,7 @@ const PhotosPage: React.FC = () => {
   const [photoPageHeight, setPhotoPageHeight] = useState(0.0);
   const [currPage, setCurrPage] = useState(1);
   const [pageInput, setPageInput] = useState('1');
-  const [pageSize, setPageSize] = useState(18);
+  const [pageSize] = useState(18);
   const [numPages, setNumPages] = useState(1);
   const [showPages, setShowPages] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
