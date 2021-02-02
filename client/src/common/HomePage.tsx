@@ -69,13 +69,13 @@ const HomePage: React.FC = () => {
 
     const fetchUser = async () => {
       const user = await getAuthenticatedUser();
+      setInitFinished(true);
       if (user == null) {
         dispatch(signInFailed);
         return;
       }
 
       setCurrUser(user);
-      setInitFinished(true);
     };
     fetchUser();
   }, []);

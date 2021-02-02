@@ -60,7 +60,7 @@ func (s *Server) Run(addr string) {
 	}
 
 	c := cors.New(cors.Options{
-		AllowedMethods:   []string{"GET", "POST", "DELETE"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete},
 		AllowedOrigins:   []string{frontendUrl},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
