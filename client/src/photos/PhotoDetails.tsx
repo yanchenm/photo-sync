@@ -58,6 +58,28 @@ const PhotoDetails: React.FC = () => {
     }
   };
 
+  const onDownloadClick = () => {
+    if (photo != null) {
+      document.body.style.cursor = 'wait';
+      getPhotoById(photo.id)
+        .then((download) => {
+          if (download != null) {
+            window.open(download.url);
+          } else {
+            dispatch(
+              sendAlert({
+                type: 'negative',
+                title: 'Error!',
+                message: 'There was a problem getting your photo. Please try again.',
+              }),
+            );
+            history.push('/photos');
+          }
+        })
+        .finally(() => (document.body.style.cursor = 'default'));
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       const user = await getAuthenticatedUser();
@@ -151,7 +173,11 @@ const PhotoDetails: React.FC = () => {
               <div className="flex flex-row items-center space-x-6 text-2xl pb-3">
                 <FontAwesomeIcon icon={faPlus} className="cursor-pointer hover:text-emerald-400" />
                 <FontAwesomeIcon icon={faShare} className="cursor-pointer hover:text-emerald-400" />
-                <FontAwesomeIcon icon={faDownload} className="cursor-pointer hover:text-emerald-400" />
+                <FontAwesomeIcon
+                  icon={faDownload}
+                  className="cursor-pointer hover:text-emerald-400"
+                  onClick={onDownloadClick}
+                />
                 <FontAwesomeIcon
                   icon={faTrashAlt}
                   className="cursor-pointer hover:text-red-600"
