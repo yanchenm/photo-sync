@@ -83,7 +83,7 @@ const HomePage: React.FC = () => {
     <>
       {currUser != null && (
         <div className="flex flex-row">
-          <div className="flex flex-col items-center w-60 flex-none min-h-screen z-50 justify-between">
+          <div className="flex flex-col items-center w-60 flex-none min-h-screen z-50 justify-between mr-4">
             <div className="flex flex-col items-center pl-4 pt-4 pb-4">
               <h1 className="font-default text-4xl font-bold p-4 mb-6">photos</h1>
               <div className="w-40 mb-10">

@@ -11,12 +11,16 @@ import { useSelector } from 'react-redux';
 
 const PhotosPage: React.FC = () => {
   const [photoList, setPhotoList] = useState<Array<Photo>>([]);
+  const [photoCards, setPhotoCards] = useState<JSX.Element[]>([]);
+  const [photoPageHeight, setPhotoPageHeight] = useState(0.0);
   const [currPage, setCurrPage] = useState(1);
   const [pageInput, setPageInput] = useState('1');
   const [pageSize, setPageSize] = useState(18);
   const [numPages, setNumPages] = useState(1);
   const [showPages, setShowPages] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [showSpinner, setShowSpinner] = useState(true);
+  const [numLoading, setNumLoading] = useState(0);
 
   const authState = useSelector((state: RootState) => state.auth);
 
@@ -58,27 +62,47 @@ const PhotosPage: React.FC = () => {
     fetchPhotos();
   }, [authState, currPage, pageSize]);
 
-  const photoSizes = photoList.map((photo) => ({
-    width: photo.details.width,
-    height: photo.details.height,
-  }));
+  useEffect(() => {
+    if (numLoading <= 0) {
+      setShowSpinner(false);
+    }
+  }, [numLoading]);
 
-  const photoLayout = JustifiedLayout(photoSizes, {
-    containerWidth: containerWidth,
-  });
+  console.log(numLoading);
 
-  const photoCards = photoLayout.boxes.map((layout, index) => (
-    <PhotoCard
-      key={photoList[index].id}
-      left={layout.left}
-      top={layout.top}
-      width={layout.width}
-      height={layout.height}
-      src={photoList[index].thumbnail_url}
-      alt={photoList[index].filename}
-      onClick={() => history.push(`/photos/${photoList[index].id}`)}
-    />
-  ));
+  useEffect(() => {
+    setNumLoading(photoList.length);
+    setShowSpinner(true);
+
+    const photoSizes = photoList.map((photo) => ({
+      width: photo.details.width,
+      height: photo.details.height,
+    }));
+
+    const photoLayout = JustifiedLayout(photoSizes, {
+      containerWidth: containerWidth,
+    });
+
+    setPhotoPageHeight(photoLayout.containerHeight);
+
+    if (photoLayout != null) {
+      setPhotoCards(
+        photoLayout.boxes.map((layout, index) => (
+          <PhotoCard
+            key={photoList[index].id}
+            left={layout.left}
+            top={layout.top}
+            width={layout.width}
+            height={layout.height}
+            src={photoList[index].thumbnail_url}
+            alt={photoList[index].filename}
+            onClick={() => history.push(`/photos/${photoList[index].id}`)}
+            onLoad={() => setNumLoading(numLoading - 1)}
+          />
+        )),
+      );
+    }
+  }, [photoList]);
 
   const onPageChangeSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -94,17 +118,19 @@ const PhotosPage: React.FC = () => {
     }
   };
 
-  console.log(photoLayout);
-
   return (
-    <div className="p-4 relative">
-      <div ref={containerRef} className="relative flex flex-col items-center">
+    <div ref={containerRef}>
+      <div
+        className={`${
+          showSpinner ? 'visible' : 'hidden'
+        } p-4 w-full flex flex-row h-screen items-center justify-center`}
+      >
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24" />
+      </div>
+      <div className={`${showSpinner ? 'hidden' : 'visible'} p-4 relative flex flex-col items-center`}>
         {photoCards}
         {showPages && (
-          <div
-            className="flex flex-col items-center"
-            style={{ position: 'absolute', top: photoLayout.containerHeight + 10 }}
-          >
+          <div className="flex flex-col items-center" style={{ position: 'absolute', top: photoPageHeight + 10 }}>
             <div className="flex flex-row items-center mt-4 mb-4">
               {currPage !== 1 && (
                 <FontAwesomeIcon

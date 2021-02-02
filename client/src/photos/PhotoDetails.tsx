@@ -94,12 +94,8 @@ const PhotoDetails: React.FC = () => {
               } flex max-h-full max-w-full shadow rounded overflow-hidden items-center justify-center`}
               onLoad={() => setShowSpinner(false)}
             />
-            <div className="flex flex-row h-screen items-center justify-center">
-              <div
-                className={`${
-                  showSpinner ? 'visible' : 'hidden'
-                } loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24`}
-              />
+            <div className={`${showSpinner ? 'visible' : 'hidden'} flex flex-row h-screen items-center justify-center`}>
+              <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24" />
             </div>
           </div>
           <div className="pl-9 pt-6 w-1/4 flex-none">
