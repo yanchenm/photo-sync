@@ -68,8 +68,6 @@ const PhotosPage: React.FC = () => {
     }
   }, [numLoading]);
 
-  console.log(numLoading);
-
   useEffect(() => {
     setNumLoading(photoList.length);
     setShowSpinner(true);
@@ -122,10 +120,17 @@ const PhotosPage: React.FC = () => {
     <div ref={containerRef}>
       <div
         className={`${
-          showSpinner ? 'visible' : 'hidden'
+          showSpinner || photoCards.length === 0 ? 'visible' : 'hidden'
         } p-4 w-full flex flex-row h-screen items-center justify-center`}
       >
-        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24" />
+        {photoCards.length === 0 ? (
+          <div className="font-default text-2xl font-medium text-center">
+            <p>There&apos;s nothing here yet!</p>
+            <p className="text-emerald-400">Try uploading a photo.</p>
+          </div>
+        ) : (
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24" />
+        )}
       </div>
       <div className={`${showSpinner ? 'hidden' : 'visible'} p-4 relative flex flex-col items-center`}>
         {photoCards}

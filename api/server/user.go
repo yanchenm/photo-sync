@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 
@@ -11,6 +12,11 @@ import (
 )
 
 func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) {
+	if os.Getenv("DISABLE_SIGN_UP") != "false" {
+		respondWithError(w, http.StatusForbidden, "you can't do that")
+		return
+	}
+
 	user := models.User{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {

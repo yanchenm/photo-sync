@@ -109,7 +109,8 @@ const HomePage: React.FC = () => {
         header={alertState.alertTitle}
         body={alertState.alertMessage}
         onClose={hideAlert}
-        clickable={false}
+        clickable={alertState.onAlertClick != null}
+        onClick={alertState.onAlertClick}
       />
       {currUser != null && (
         <div className="flex flex-row">

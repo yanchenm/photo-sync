@@ -7,12 +7,14 @@ type AlertState = {
   alertType: AlertType | null;
   alertTitle: string;
   alertMessage: string;
+  onAlertClick?: () => void;
 };
 
 type SendAlertPayload = {
   type: AlertType;
   title: string;
   message: string;
+  onClick?: () => void;
 };
 
 const initialState = {
@@ -31,12 +33,11 @@ const alertSlice = createSlice({
       state.alertType = action.payload.type;
       state.alertTitle = action.payload.title;
       state.alertMessage = action.payload.message;
+      state.onAlertClick = action.payload.onClick;
     },
     clearAlert(state) {
       state.showAlert = false;
-      state.alertType = null;
-      state.alertTitle = '';
-      state.alertMessage = '';
+      state.onAlertClick = undefined;
     },
   },
 });

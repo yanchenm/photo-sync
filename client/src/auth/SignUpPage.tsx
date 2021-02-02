@@ -1,53 +1,83 @@
 import { Link, useHistory } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SignUpData, addNewUser } from '../users/userHandler';
+import { clearAlert, sendAlert } from '../common/alertSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Alert from '../common/Alert';
+import { RootState } from '../store';
 import { useForm } from 'react-hook-form';
 
 const SignUpPage: React.FC = () => {
+  const alertState = useSelector((state: RootState) => state.alert);
+  const [showAlert, setShowAlert] = useState(false);
+
   const { register, handleSubmit, errors } = useForm();
-  const [successVisible, setSuccessVisible] = useState(false);
-  const [failureVisible, setFailureVisible] = useState(false);
+
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const onSubmit = async (data: SignUpData) => {
+    if (process.env.REACT_APP_DISABLE_SIGN_UP !== 'false') {
+      dispatch(
+        sendAlert({
+          type: 'negative',
+          title: 'Feature disabled!',
+          message: 'Creating new accounts is currently disabled. Please use an existing test account.',
+        }),
+      );
+      return;
+    }
+
     const res = await addNewUser(data);
     if (res) {
-      showSuccessAlert();
+      dispatch(
+        sendAlert({
+          type: 'positive',
+          title: 'Account created!',
+          message: 'Please sign in to continue.',
+          onClick: () => history.push('/login'),
+        }),
+      );
     } else {
-      showFailAlert();
+      dispatch(
+        sendAlert({
+          type: 'negative',
+          title: 'Error!',
+          message: 'There was a problem creating your account. Please try again.',
+        }),
+      );
     }
   };
 
-  const showSuccessAlert = () => {
-    setSuccessVisible(true);
-    setTimeout(() => setSuccessVisible(false), 5000);
+  const showAlertWithTimeout = () => {
+    setShowAlert(true);
+    setTimeout(() => hideAlert(), 5000);
   };
 
-  const showFailAlert = () => {
-    setFailureVisible(true);
-    setTimeout(() => setFailureVisible(false), 5000);
+  const hideAlert = () => {
+    setShowAlert(false);
+    dispatch(clearAlert());
   };
+
+  useEffect(() => {
+    if (alertState.showAlert) {
+      showAlertWithTimeout();
+    } else {
+      hideAlert();
+    }
+  }, [alertState]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Alert
-        visible={successVisible}
-        positive
-        header="Account created!"
-        body="Please sign in to continue"
-        onClose={() => setSuccessVisible(false)}
-        clickable
-        onClick={() => history.push('/login')}
-      />
-      <Alert
-        visible={failureVisible}
-        positive={false}
-        header="Error!"
-        body="There was a problem creating your account. Please try again."
-        onClose={() => setFailureVisible(false)}
-        clickable={false}
+        visible={showAlert}
+        positive={alertState.alertType === 'positive'}
+        header={alertState.alertTitle}
+        body={alertState.alertMessage}
+        onClose={hideAlert}
+        clickable={alertState.onAlertClick != null}
+        onClick={alertState.onAlertClick}
       />
       <div className="max-w-md w-full space-y-3">
         <h1 className="font-default text-5xl font-bold mt-6 text-center">sign up</h1>
