@@ -21,6 +21,7 @@ const PhotosPage: React.FC = () => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [showSpinner, setShowSpinner] = useState(true);
   const [numLoading, setNumLoading] = useState(0);
+  const [initFinished, setInitFinished] = useState(false);
 
   const authState = useSelector((state: RootState) => state.auth);
 
@@ -44,6 +45,7 @@ const PhotosPage: React.FC = () => {
         const photos = await getPhotos((currPage - 1) * pageSize, pageSize);
         if (photos != null && photos.items.photos != null) {
           setPhotoList(photos.items.photos);
+          setInitFinished(true);
 
           const totalPages = Math.ceil(photos.total / pageSize);
           setNumPages(totalPages);
@@ -63,7 +65,7 @@ const PhotosPage: React.FC = () => {
   }, [authState, currPage, pageSize]);
 
   useEffect(() => {
-    if (numLoading <= 0) {
+    if (numLoading <= 0 && initFinished) {
       setShowSpinner(false);
     }
   }, [numLoading]);
@@ -123,7 +125,7 @@ const PhotosPage: React.FC = () => {
           showSpinner || photoCards.length === 0 ? 'visible' : 'hidden'
         } p-4 w-full flex flex-row h-screen items-center justify-center`}
       >
-        {photoCards.length === 0 ? (
+        {photoCards.length === 0 && initFinished ? (
           <div className="font-default text-2xl font-medium text-center">
             <p>There&apos;s nothing here yet!</p>
             <p className="text-emerald-400">Try uploading a photo.</p>
