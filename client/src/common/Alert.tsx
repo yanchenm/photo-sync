@@ -16,7 +16,7 @@ type AlertProps = {
 const Alert: React.FC<AlertProps> = ({ visible, positive, header, body, onClose, clickable, onClick }: AlertProps) => {
   return (
     <CSSTransition in={visible} timeout={300} classNames="alert" unmountOnExit>
-      <div className="fixed top-0 right-0">
+      <div className="fixed top-0 right-0 z-50">
         <div className="p-10">
           <div
             className={`${

@@ -55,3 +55,16 @@ export const getPhotoById = async (id: string): Promise<Photo | null> => {
     return null;
   }
 };
+
+export const deletePhoto = async (id: string): Promise<boolean> => {
+  try {
+    const res = await apiWithAuth.delete(`/photos/${id}`);
+    if (res.status !== 200) {
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    return false;
+  }
+};

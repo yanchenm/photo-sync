@@ -6,12 +6,14 @@ import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 
+import Alert from './Alert';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
 import UserDisplay from './UserDisplay';
+import { clearAlert } from './alertSlice';
 import { trySignOut } from '../auth/authHandler';
 
 type PageName = 'photos' | 'albums' | 'sharing';
@@ -28,12 +30,14 @@ const renderPage = (page: PageName): ReactElement => {
 };
 
 const HomePage: React.FC = () => {
+  const alertState = useSelector((state: RootState) => state.alert);
   const authState = useSelector((state: RootState) => state.auth);
   const uploadState = useSelector((state: RootState) => state.upload);
 
   const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
   const [currUser, setCurrUser] = useState<User>();
   const [initFinished, setInitFinished] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -48,6 +52,16 @@ const HomePage: React.FC = () => {
     dispatch(trySignOut());
     dispatch(clearError());
     history.push('/login');
+  };
+
+  const showAlertWithTimeout = () => {
+    setShowAlert(true);
+    setTimeout(() => hideAlert(), 5000);
+  };
+
+  const hideAlert = () => {
+    setShowAlert(false);
+    dispatch(clearAlert());
   };
 
   useEffect(() => {
@@ -79,8 +93,24 @@ const HomePage: React.FC = () => {
     }
   });
 
+  useEffect(() => {
+    if (alertState.showAlert) {
+      showAlertWithTimeout();
+    } else {
+      hideAlert();
+    }
+  }, [alertState]);
+
   return (
     <>
+      <Alert
+        visible={showAlert}
+        positive={alertState.alertType === 'positive'}
+        header={alertState.alertTitle}
+        body={alertState.alertMessage}
+        onClose={hideAlert}
+        clickable={false}
+      />
       {currUser != null && (
         <div className="flex flex-row">
           <div className="flex flex-col items-center w-60 flex-none min-h-screen z-50 justify-between mr-4">
