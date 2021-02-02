@@ -4,7 +4,7 @@ import axios from 'axios';
 import { refreshAuth } from './auth/authHandler';
 import { store } from './store';
 
-const apiUrl = process.env.REACT_APP_STAGE === 'prod' ? 'https://api.photos.runny.cloud' : 'http://localhost:8080';
+const apiUrl = process.env.NODE_ENV === 'production' ? 'https://api.photos.runny.cloud' : 'http://localhost:8080';
 
 axios.defaults.withCredentials = true;
 
