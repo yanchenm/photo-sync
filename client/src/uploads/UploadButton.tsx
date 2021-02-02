@@ -66,7 +66,12 @@ const UploadButton: React.FC = () => {
         </button>
 
         {showPopper ? (
-          <div ref={popperRef} style={styles.popper} {...attributes.popper} className="p-4 bg-white shadow rounded">
+          <div
+            ref={popperRef}
+            style={styles.popper}
+            {...attributes.popper}
+            className="p-4 bg-white shadow rounded border"
+          >
             <div ref={setArrowRef} />
             <input
               type="file"

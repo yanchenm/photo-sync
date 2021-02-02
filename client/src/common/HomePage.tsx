@@ -1,4 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
+import { User, getAuthenticatedUser } from '../users/userHandler';
+import { clearError, signInFailed } from '../auth/authSlice';
 import { clearUploads, setClosed } from '../uploads/uploadSlice';
 import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,8 +11,8 @@ import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
-import { clearError } from '../auth/authSlice';
-import { tryRefresh } from '../auth/authHandler';
+import UserDisplay from './UserDisplay';
+import { trySignOut } from '../auth/authHandler';
 
 type PageName = 'photos' | 'albums' | 'sharing';
 
@@ -29,6 +31,7 @@ const HomePage: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
   const uploadState = useSelector((state: RootState) => state.upload);
   const [uploadWindowVisible, setUploadWindowVisible] = useState(false);
+  const [currUser, setCurrUser] = useState<User>();
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -39,16 +42,29 @@ const HomePage: React.FC = () => {
     setUploadWindowVisible(false);
   };
 
+  const onSignOut = () => {
+    dispatch(trySignOut());
+    dispatch(clearError());
+    history.push('/login');
+  };
+
   useEffect(() => {
     dispatch(clearUploads());
+
+    const fetchUser = async () => {
+      const user = await getAuthenticatedUser();
+      if (user == null) {
+        dispatch(signInFailed);
+        return;
+      }
+
+      setCurrUser(user);
+    };
+    fetchUser();
   }, []);
 
   useEffect(() => {
-    if (!authState.signedIn && !authState.error) {
-      dispatch(tryRefresh());
-    }
-
-    if (authState.error) {
+    if (authState.error || !authState.signedIn) {
       dispatch(clearError());
       history.push('/login');
     }
@@ -61,54 +77,64 @@ const HomePage: React.FC = () => {
   });
 
   return (
-    <div className="flex flex-row">
-      <div className="flex flex-col items-center w-60 flex-none min-h-screen pl-4 pt-4 pb-4 z-50">
-        <h1 className="font-default text-4xl font-bold p-4 mb-6">photos</h1>
-        <div className="w-40 mb-10">
-          <UploadButton />
+    <>
+      {currUser != null && (
+        <div className="flex flex-row">
+          <div className="flex flex-col items-center w-60 flex-none min-h-screen z-50 justify-between">
+            <div className="flex flex-col items-center pl-4 pt-4 pb-4">
+              <h1 className="font-default text-4xl font-bold p-4 mb-6">photos</h1>
+              <div className="w-40 mb-10">
+                <UploadButton />
+              </div>
+              <div className="flex flex-col items-start">
+                <div
+                  className={`${
+                    page == 'photos' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
+                  } py-3 px-6 rounded cursor-pointer w-full`}
+                  onClick={() => history.push('/photos')}
+                >
+                  <div className="flex flex-row w-full items-center space-x-6 text-xl">
+                    <FontAwesomeIcon icon={faImages} />
+                    <p className="font-default">Photos</p>
+                  </div>
+                </div>
+                <div
+                  className={`${
+                    page == 'albums' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
+                  } group py-3 px-6 rounded cursor-pointer w-full`}
+                  onClick={() => history.push('/albums')}
+                >
+                  <div className="flex flex-row w-full items-center space-x-6 text-xl">
+                    <FontAwesomeIcon icon={faBookOpen} />
+                    <p className="font-default">Albums</p>
+                  </div>
+                </div>
+                <div
+                  className={`${
+                    page == 'sharing' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
+                  } group py-3 px-6 rounded cursor-pointer w-full`}
+                  onClick={() => history.push('/sharing')}
+                >
+                  <div className="flex flex-row w-full items-center space-x-6 text-xl">
+                    <FontAwesomeIcon icon={faShareSquare} />
+                    <p className="font-default">Sharing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <UserDisplay user={currUser} onSignOut={onSignOut} />
+          </div>
+          <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 overflow-y-scroll">{renderPage(page)}</div>
+          </div>
+          <UploadWindow
+            visible={uploadWindowVisible}
+            header="Uploading Photos..."
+            onClose={() => closeUploadWindow()}
+          />
         </div>
-        <div className="flex flex-col items-start">
-          <div
-            className={`${
-              page == 'photos' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } py-3 px-6 rounded cursor-pointer w-full`}
-            onClick={() => history.push('/photos')}
-          >
-            <div className="flex flex-row w-full items-center space-x-6 text-xl">
-              <FontAwesomeIcon icon={faImages} />
-              <p className="font-default">Photos</p>
-            </div>
-          </div>
-          <div
-            className={`${
-              page == 'albums' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } group py-3 px-6 rounded cursor-pointer w-full`}
-            onClick={() => history.push('/albums')}
-          >
-            <div className="flex flex-row w-full items-center space-x-6 text-xl">
-              <FontAwesomeIcon icon={faBookOpen} />
-              <p className="font-default">Albums</p>
-            </div>
-          </div>
-          <div
-            className={`${
-              page == 'sharing' ? 'bg-emerald-300' : 'bg-white hover:bg-emerald-200'
-            } group py-3 px-6 rounded cursor-pointer w-full`}
-            onClick={() => history.push('/sharing')}
-          >
-            <div className="flex flex-row w-full items-center space-x-6 text-xl">
-              <FontAwesomeIcon icon={faShareSquare} />
-              <p className="font-default">Sharing</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 overflow-y-scroll">{renderPage(page)}</div>
-      </div>
-
-      <UploadWindow visible={uploadWindowVisible} header="Uploading Photos..." onClose={() => closeUploadWindow()} />
-    </div>
+      )}
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
-import { refreshAuth, tryRefresh } from './auth/authHandler';
+import { signInFailed, signInSuccessful } from './auth/authSlice';
 
 import axios from 'axios';
-import { signInFailed } from './auth/authSlice';
+import { refreshAuth } from './auth/authHandler';
 import { store } from './store';
 
 const apiUrl = process.env.REACT_APP_STAGE === 'prod' ? 'https://api.photos.runny.cloud' : 'http://localhost:8080';
@@ -20,16 +20,18 @@ export const apiWithAuth = axios.create({
 
 apiWithAuth.interceptors.request.use(
   (config) => {
-    const state = store.getState();
-    const accessToken = state.auth.accessToken;
+    if (config.data == null || !config.data._retry) {
+      const state = store.getState();
+      const accessToken = state.auth.accessToken;
 
-    config.headers = {
-      Authorization: `Bearer ${accessToken}`,
-    };
+      config.headers = {
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
     return config;
   },
-  (error) => {
-    Promise.reject(error);
+  (err) => {
+    Promise.reject(err);
   },
 );
 
@@ -37,18 +39,30 @@ apiWithAuth.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  async (err) => {
+    const originalRequest = err.config;
 
     // If not authorized error and we haven't tried refreshing yet
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (err.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      store.dispatch(tryRefresh());
+
+      const response = await refreshAuth();
+      if (response == null) {
+        store.dispatch(signInFailed());
+        return Promise.reject(err);
+      }
+
+      const accessToken = response.token;
+      const user = response.user;
+
+      originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+
+      store.dispatch(signInSuccessful({ user, accessToken }));
       return apiWithAuth(originalRequest);
     }
 
     // Otherwise, error
     store.dispatch(signInFailed());
-    return Promise.reject(error);
+    return Promise.reject(err);
   },
 );

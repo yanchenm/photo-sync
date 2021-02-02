@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/yanchenm/photo-sync/models"
 )
 
@@ -54,5 +56,24 @@ func (s *Server) handleGetAuthenticatedUser(w http.ResponseWriter, r *http.Reque
 	}
 
 	user.BeforeSend()
+	respondWithJSON(w, http.StatusOK, user)
+}
+
+func (s *Server) handleGetUserByEmail(w http.ResponseWriter, r *http.Request, _ models.User) {
+	params := mux.Vars(r)
+	email := params["email"]
+
+	if email == "" {
+		logErrorAndRespond(w, http.StatusBadRequest, "missing or invalid email", nil)
+	}
+
+	user, err := s.DB.GetUserFromEmail(email)
+	if err != nil {
+		logErrorAndRespond(w, http.StatusInternalServerError, "failed to get user details", err)
+		return
+	}
+
+	user.BeforeSend()
+	user.CreatedAt = ""
 	respondWithJSON(w, http.StatusOK, user)
 }

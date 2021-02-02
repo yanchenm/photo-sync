@@ -34,3 +34,18 @@ export const getAuthenticatedUser = async (): Promise<User | null> => {
     return null;
   }
 };
+
+export const getUserByEmail = async (email: string): Promise<User | null> => {
+  try {
+    const res = await apiWithAuth.get(`/user/${email}`);
+    if (res.status !== 200) {
+      return null;
+    }
+    return {
+      name: res.data['name'],
+      email: res.data['email'],
+    };
+  } catch (err) {
+    return null;
+  }
+};

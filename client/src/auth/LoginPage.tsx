@@ -53,7 +53,7 @@ const LoginPage: React.FC = () => {
             sign up
           </Link>
         </p>
-        <div className="rounded-md shadow-md space-y-6 bg-white px-9 py-6">
+        <div className="rounded-md shadow-md border space-y-6 bg-white px-9 py-6">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="email" className="font-default font-normal text-md">
@@ -98,7 +98,7 @@ const LoginPage: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-emerald-400 active:bg-emerald-500 focus:outline-none hover:shadow-md"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent font-default text-sm font-medium rounded-md text-black bg-emerald-400 active:bg-emerald-500 focus:outline-none hover:shadow-md"
             >
               Sign In
             </button>

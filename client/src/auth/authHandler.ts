@@ -1,8 +1,8 @@
+import { api, apiWithAuth } from '../api';
 import { signInFailed, signInSuccessful, signOutFailed, signOutSuccessful } from './authSlice';
 
 import { AppThunk } from '../store';
 import { User } from '../users/userHandler';
-import { api } from '../api';
 
 export type Credentials = {
   email: string;
@@ -52,13 +52,9 @@ export const refreshAuth = async (): Promise<SignInResponse | null> => {
   }
 };
 
-export const signOut = async (accessToken: string): Promise<boolean> => {
-  const config = {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  };
-
+export const signOut = async (): Promise<boolean> => {
   try {
-    const res = await api.post('/logout', null, config);
+    const res = await apiWithAuth.post('/logout');
     return res.status === 200;
   } catch (err) {
     return false;
@@ -103,17 +99,9 @@ export const tryRefresh = (): AppThunk => async (dispatch) => {
   dispatch(signInSuccessful({ user, accessToken }));
 };
 
-export const trySignOut = (): AppThunk => async (dispatch, getState) => {
+export const trySignOut = (): AppThunk => async (dispatch) => {
   try {
-    const state = getState();
-    const token = state.auth.accessToken;
-
-    if (token == null) {
-      dispatch(signOutFailed());
-      return;
-    }
-
-    const status = await signOut(token);
+    const status = await signOut();
     if (!status) {
       dispatch(signOutFailed());
       return;
