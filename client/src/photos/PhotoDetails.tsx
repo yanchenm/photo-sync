@@ -21,7 +21,7 @@ const PhotoDetails: React.FC = () => {
 
   const [photo, setPhoto] = useState<Photo>();
   const [author, setAuthor] = useState<string>();
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(true);
   const [initFinished, setInitFinished] = useState(false);
 
   const processDate = (date: string): string => {
@@ -46,11 +46,6 @@ const PhotoDetails: React.FC = () => {
 
     const fetchPhoto = async () => {
       if (initFinished) {
-        if (authState.error || !authState.signedIn) {
-          dispatch(clearError());
-          history.push('/login');
-        }
-
         const photoRes = await getPhotoById(id);
         if (photoRes == null) {
           history.push('/photos');
@@ -71,9 +66,18 @@ const PhotoDetails: React.FC = () => {
     fetchPhoto();
   }, [initFinished]);
 
+  useEffect(() => {
+    if (initFinished) {
+      if (authState.error || !authState.signedIn) {
+        dispatch(clearError());
+        history.push('/login');
+      }
+    }
+  });
+
   return (
     <>
-      {photo != null && author != null && !showSpinner && (
+      {photo != null && author != null && (
         <div className="flex max-h-screen flex-row p-6 space-x-3">
           <div className="w-60 flex-none text-right pr-12 pt-6">
             <FontAwesomeIcon
@@ -82,19 +86,24 @@ const PhotoDetails: React.FC = () => {
               onClick={() => history.push('/photos')}
             />
           </div>
-          <div className="flex-auto flex items-center justify-center">
-            {photo == null ? (
-              <p>Error</p>
-            ) : (
-              <img
-                src={photo.url}
-                className="flex max-h-full max-w-full shadow rounded overflow-hidden items-center justify-center"
-                onLoad={() => setShowSpinner(false)}
+          <div className="flex-auto flex-col items-center justify-center">
+            <img
+              src={photo.url}
+              className={`${
+                showSpinner ? 'hidden' : 'visible'
+              } flex max-h-full max-w-full shadow rounded overflow-hidden items-center justify-center`}
+              onLoad={() => setShowSpinner(false)}
+            />
+            <div className="flex flex-row h-screen items-center justify-center">
+              <div
+                className={`${
+                  showSpinner ? 'visible' : 'hidden'
+                } loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24`}
               />
-            )}
+            </div>
           </div>
           <div className="pl-9 pt-6 w-1/4 flex-none">
-            <h2 className="font-default font-medium text-4xl mb-6">{photo.filename}</h2>
+            <h2 className="font-default font-medium text-4xl pb-6 overflow-hidden truncate">{photo.filename}</h2>
             <p className="font-default">
               By&nbsp;<span className="text-emerald-400 font-medium">{author}</span>
             </p>
