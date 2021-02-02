@@ -13,7 +13,7 @@ const PhotosPage: React.FC = () => {
   const [photoList, setPhotoList] = useState<Array<Photo>>([]);
   const [currPage, setCurrPage] = useState(1);
   const [pageInput, setPageInput] = useState('1');
-  const [pageSize, setPageSize] = useState(30);
+  const [pageSize, setPageSize] = useState(18);
   const [numPages, setNumPages] = useState(1);
   const [showPages, setShowPages] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -94,51 +94,56 @@ const PhotosPage: React.FC = () => {
     }
   };
 
+  console.log(photoLayout);
+
   return (
-    <div className="p-4">
-      <div ref={containerRef} style={{ position: 'relative' }}>
+    <div className="p-4 relative">
+      <div ref={containerRef} className="relative flex flex-col items-center">
         {photoCards}
-      </div>
-      {showPages && (
-        <div className="flex flex-col items-center">
-          <div className="flex flex-row items-center mt-4">
-            {currPage !== 1 && (
-              <FontAwesomeIcon
-                icon={faChevronLeft}
-                onClick={() => {
-                  const newPage = currPage - 1;
-                  setCurrPage(newPage);
-                  setPageInput(newPage.toString());
-                }}
-                className="mr-3 text-xl"
-              />
-            )}
-            <p className="font-default text-md">Page &nbsp;</p>
-            <form onSubmit={onPageChangeSubmit}>
-              <input
-                className="font-default text-md appearance-none rounded relative block border border-gray-800 w-8 text-center"
-                value={pageInput}
-                ref={pageInputRef}
-                onChange={(event) => setPageInput(event.target.value)}
-                onFocus={() => setPageInput('')}
-                onBlur={() => setPageInput(currPage.toString())}
-              />
-            </form>
-            <p className="font-default text-md">&nbsp; of {numPages}</p>
-            {currPage !== numPages && (
-              <FontAwesomeIcon
-                icon={faChevronRight}
-                onClick={() => {
-                  const newPage = currPage + 1;
-                  setCurrPage(newPage);
-                  setPageInput(newPage.toString());
-                }}
-                className="ml-3 text-xl"
-              />
-            )}
+        {showPages && (
+          <div
+            className="flex flex-col items-center"
+            style={{ position: 'absolute', top: photoLayout.containerHeight + 10 }}
+          >
+            <div className="flex flex-row items-center mt-4 mb-4">
+              {currPage !== 1 && (
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  onClick={() => {
+                    const newPage = currPage - 1;
+                    setCurrPage(newPage);
+                    setPageInput(newPage.toString());
+                  }}
+                  className="mr-3 text-xl cursor-pointer"
+                />
+              )}
+              <p className="font-default text-md">Page &nbsp;</p>
+              <form onSubmit={onPageChangeSubmit}>
+                <input
+                  className="font-default text-md appearance-none rounded relative block border border-gray-800 w-8 text-center"
+                  value={pageInput}
+                  ref={pageInputRef}
+                  onChange={(event) => setPageInput(event.target.value)}
+                  onFocus={() => setPageInput('')}
+                  onBlur={() => setPageInput(currPage.toString())}
+                />
+              </form>
+              <p className="font-default text-md">&nbsp; of {numPages}</p>
+              {currPage !== numPages && (
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  onClick={() => {
+                    const newPage = currPage + 1;
+                    setCurrPage(newPage);
+                    setPageInput(newPage.toString());
+                  }}
+                  className="ml-3 text-xl cursor-pointer"
+                />
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

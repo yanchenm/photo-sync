@@ -82,13 +82,13 @@ const PhotoDetails: React.FC = () => {
               onClick={() => history.push('/photos')}
             />
           </div>
-          <div className="flex-auto">
+          <div className="flex-auto flex items-center justify-center">
             {photo == null ? (
               <p>Error</p>
             ) : (
               <img
                 src={photo.url}
-                className="flex shadow rounded overflow-hidden items-center justify-center"
+                className="flex max-h-full max-w-full shadow rounded overflow-hidden items-center justify-center"
                 onLoad={() => setShowSpinner(false)}
               />
             )}
@@ -96,9 +96,21 @@ const PhotoDetails: React.FC = () => {
           <div className="pl-9 pt-6 w-1/4 flex-none">
             <h2 className="font-default font-medium text-4xl mb-6">{photo.filename}</h2>
             <p className="font-default">
-              By&nbsp;<span className="text-emerald-400 font-medium">{photo.user}</span>
+              By&nbsp;<span className="text-emerald-400 font-medium">{author}</span>
             </p>
             <p className="font-default">{`Uploaded ${processDate(photo.uploaded_at)}`}</p>
+            <p className="font-default mt-6">
+              <span className="font-medium">Type:&nbsp;</span>
+              {photo.details.file_type}
+            </p>
+            <p className="font-default">
+              <span className="font-medium">Dimensions:&nbsp;</span>
+              {`${photo.details.width} x ${photo.details.height}`}
+            </p>
+            <p className="font-default">
+              <span className="font-medium">Size:&nbsp;</span>
+              {`${photo.details.size.toFixed(2)} MB`}
+            </p>
           </div>
         </div>
       )}
