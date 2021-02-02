@@ -43,9 +43,10 @@ const PhotosPage: React.FC = () => {
     const fetchPhotos = async () => {
       if (authState.accessToken != null) {
         const photos = await getPhotos((currPage - 1) * pageSize, pageSize);
+
+        setInitFinished(true);
         if (photos != null && photos.items.photos != null) {
           setPhotoList(photos.items.photos);
-          setInitFinished(true);
 
           const totalPages = Math.ceil(photos.total / pageSize);
           setNumPages(totalPages);

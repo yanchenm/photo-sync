@@ -6,10 +6,12 @@ import { faBookOpen, faImages, faShareSquare } from '@fortawesome/free-solid-svg
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 
+import AlbumPage from '../albums/AlbumsPage';
 import Alert from './Alert';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PhotosPage from '../photos/PhotosPage';
 import { RootState } from '../store';
+import SharingPage from '../sharing/SharingPage';
 import UploadButton from '../uploads/UploadButton';
 import UploadWindow from '../uploads/UploadWindow';
 import UserDisplay from './UserDisplay';
@@ -24,6 +26,10 @@ type PageParamType = {
 
 const renderPage = (page: PageName): ReactElement => {
   switch (page) {
+    case 'albums':
+      return <AlbumPage />;
+    case 'sharing':
+      return <SharingPage />;
     default:
       return <PhotosPage />;
   }
