@@ -1,12 +1,11 @@
 # photo-sync
----
 
 A cloud storage and sharing solution for your photo library – [photos.runny.cloud](https://photos.runny.cloud)
 
 ![home page](https://i.imgur.com/ePJAaY4.png)
 
 ## Features
----
+
 - :camera: &nbsp; Responsive UI to show off all your photos
 - :cloud: &nbsp; Storage you can trust – backed by Amazon S3
 - :mag: &nbsp; Uncompressed, full-quality image always available to download
@@ -14,7 +13,7 @@ A cloud storage and sharing solution for your photo library – [photos.runny.cl
 - :unlock: &nbsp; Securely share photos and albums with other users and the public
 
 ## Tech Stack
----
+
 ### Server
 - Go
 - PostgreSQL
@@ -31,7 +30,7 @@ A cloud storage and sharing solution for your photo library – [photos.runny.cl
 - TailwindCSS
 
 ## Try It
----
+
 The project is currently hosted at [photos.runny.cloud](https://photos.runny.cloud). Account creation is currently disabled so please feel free to use the public test account below or reach out to me directly.
 
 ```
