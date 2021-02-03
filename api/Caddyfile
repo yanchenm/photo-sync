@@ -1,4 +1,0 @@
-api.photos.runny.cloud {
-    tls yanchenm@gmail.com
-    reverse_proxy server:8080
-}
