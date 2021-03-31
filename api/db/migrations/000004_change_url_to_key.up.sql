@@ -1,2 +1,0 @@
-ALTER TABLE photos
-RENAME COLUMN url TO key;

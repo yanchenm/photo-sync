@@ -1,2 +1,0 @@
-ALTER TABLE Details
-    ADD COLUMN uploaded_at TIMESTAMP;

@@ -3,7 +3,9 @@ module github.com/yanchenm/photo-sync
 go 1.15
 
 require (
+	github.com/aws/aws-lambda-go v1.23.0 // indirect
 	github.com/aws/aws-sdk-go v1.36.15
+	github.com/awslabs/aws-lambda-go-api-proxy v0.9.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/gift v1.2.1 // indirect
 	github.com/disintegration/imageorient v0.0.0-20180920195336-8147d86e83ec
