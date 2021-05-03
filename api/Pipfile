@@ -8,8 +8,12 @@ fastapi = "*"
 uvicorn = "*"
 pydantic = "*"
 sqlalchemy = "*"
+bcrypt = "*"
+psycopg2-binary = "*"
+sqlalchemy-cockroachdb = "*"
 
 [dev-packages]
+alembic = "*"
 
 [requires]
 python_version = "3.8"
