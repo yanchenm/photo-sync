@@ -43,7 +43,7 @@ target_metadata = {}
 # ... etc.
 
 
-# overwrite db urls from ini config
+# overwrite database urls from ini config
 dev_url = f"postgresql://{os.environ['DEV_DB_USER']}:{os.environ['DEV_DB_PASSWORD']}@localhost/photo_sync"
 prod_url = f"cockroachdb://{os.environ['PROD_DB_USER']}:{os.environ['PROD_DB_PASSWORD']}" +\
            "@free-tier.gcp-us-central1.cockroachlabs.cloud:26257/photo_sync?sslmode=verify-full&" +\

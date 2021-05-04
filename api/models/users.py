@@ -4,7 +4,7 @@ from typing import List
 import bcrypt
 from pydantic import BaseModel
 
-from models.auth import Auth
+from models.auth import Token
 from models.photos import Photo
 
 
@@ -24,7 +24,7 @@ class UserLogin(UserBase):
 class User(UserBase):
     created_at: datetime
     photos: List[Photo] = []
-    auth: List[Auth] = []
+    tokens: List[Token] = []
 
     class Config:
         orm_mode = True

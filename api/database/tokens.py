@@ -1,17 +1,9 @@
-from sqlalchemy import Column, String, and_
+from sqlalchemy import and_
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import Session
 
-from db.database import Base
+from database.schemas import Tokens
 from models.auth import Token
-
-
-class Tokens(Base):
-    __tablename__ = "Tokens"
-    email = Column(String, primary_key=True)
-    token = Column(String, unique=True, primary_key=True)
-
-    owner = relationship("Users", back_populates="tokens")
 
 
 def is_token_valid(db: Session, email: str, token: str) -> bool:

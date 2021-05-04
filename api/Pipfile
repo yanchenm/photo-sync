@@ -11,6 +11,7 @@ sqlalchemy = "*"
 bcrypt = "*"
 psycopg2-binary = "*"
 sqlalchemy-cockroachdb = "*"
+python-dotenv = "*"
 
 [dev-packages]
 alembic = "*"

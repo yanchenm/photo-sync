@@ -35,7 +35,7 @@ def upgrade_dev():
         sa.Column("height", sa.Integer, nullable=False),
         sa.Column("width", sa.Integer, nullable=False),
         sa.Column("size", sa.Float, nullable=False),
-        sa.Column("uploaded_at", sa.DateTime, server_default=sa.func.current_timestamp())
+        sa.Column("uploaded_at", sa.DateTime, server_default=sa.func.current_timestamp(), nullable=False)
     )
 
 
@@ -55,7 +55,7 @@ def upgrade_prod():
         sa.Column("height", sa.Integer, nullable=False),
         sa.Column("width", sa.Integer, nullable=False),
         sa.Column("size", sa.Float, nullable=False),
-        sa.Column("uploaded_at", sa.DateTime, server_default=sa.func.current_timestamp())
+        sa.Column("uploaded_at", sa.DateTime, server_default=sa.func.current_timestamp(), nullable=False)
     )
 
 

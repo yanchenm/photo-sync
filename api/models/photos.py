@@ -2,8 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from models.users import User
-
 
 class Photo(BaseModel):
     id: str
@@ -16,7 +14,6 @@ class Photo(BaseModel):
     width: int
     size: float
     uploaded_at: datetime
-    owner = User
 
     class Config:
         orm_mode = True

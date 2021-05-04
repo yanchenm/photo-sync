@@ -29,7 +29,7 @@ def upgrade_dev():
         sa.Column("email", sa.Text, primary_key=True),
         sa.Column("name", sa.Text, nullable=False),
         sa.Column("password", sa.String(60), nullable=False),
-        sa.Column("created_at", sa.DateTime, server_default=sa.func.current_timestamp())
+        sa.Column("created_at", sa.DateTime, server_default=sa.func.current_timestamp(), nullable=False)
     )
 
 
@@ -43,7 +43,7 @@ def upgrade_prod():
         sa.Column("email", sa.Text, primary_key=True),
         sa.Column("name", sa.Text, nullable=False),
         sa.Column("password", sa.String(60), nullable=False),
-        sa.Column("created_at", sa.DateTime, server_default=sa.func.current_timestamp())
+        sa.Column("created_at", sa.DateTime, server_default=sa.func.current_timestamp(), nullable=False)
     )
 
 
