@@ -1,4 +1,4 @@
-"""create auth table
+"""create tokens table
 
 Revision ID: faf138220ec9
 Revises: 75fbb6e3779a
@@ -25,23 +25,23 @@ def downgrade(engine_name):
 
 def upgrade_dev():
     op.create_table(
-        "Auth",
+        "Tokens",
         sa.Column("email", sa.Text, sa.ForeignKey("Users.email", ondelete="CASCADE"), primary_key=True),
         sa.Column("token", sa.Text, unique=True, primary_key=True)
     )
 
 
 def downgrade_dev():
-    op.drop_table("Auth")
+    op.drop_table("Tokens")
 
 
 def upgrade_prod():
     op.create_table(
-        "Auth",
+        "Tokens",
         sa.Column("email", sa.Text, sa.ForeignKey("Users.email", ondelete="CASCADE"), primary_key=True),
         sa.Column("token", sa.Text, unique=True, primary_key=True)
     )
 
 
 def downgrade_prod():
-    op.drop_table("Auth")
+    op.drop_table("Tokens")

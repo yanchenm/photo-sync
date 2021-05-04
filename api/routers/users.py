@@ -2,7 +2,7 @@ import os
 
 from fastapi import APIRouter, Response, status, HTTPException
 
-from models.User import UserCreateResponse, UserCreate
+from models.users import UserCreateResponse, UserCreate
 
 router = APIRouter()
 
