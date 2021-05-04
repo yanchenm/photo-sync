@@ -2,18 +2,6 @@ from datetime import datetime
 
 import bcrypt
 from pydantic import BaseModel
-from sqlalchemy import Column, String, Text, DateTime
-from sqlalchemy.sql import func
-
-from db.database import Base
-
-
-class Users(Base):
-    __tablename__ = "User"
-    email = Column(Text, primary_key=True)
-    name = Column(Text)
-    password = Column(String(60))
-    created_at = Column(DateTime, default=func.now())
 
 
 class UserCreate(BaseModel):
