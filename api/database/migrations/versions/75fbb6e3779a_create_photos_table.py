@@ -26,7 +26,7 @@ def downgrade(engine_name):
 def upgrade_dev():
     op.create_table(
         "Photos",
-        sa.Column("id", sa.String(27), primary_key=True),
+        sa.Column("id", sa.String(32), primary_key=True),
         sa.Column("email", sa.Text, sa.ForeignKey("Users.email", ondelete="CASCADE"), nullable=False),
         sa.Column("file_name", sa.Text, nullable=False),
         sa.Column("s3_key", sa.Text, nullable=False),
@@ -46,7 +46,7 @@ def downgrade_dev():
 def upgrade_prod():
     op.create_table(
         "Photos",
-        sa.Column("id", sa.String(27), primary_key=True),
+        sa.Column("id", sa.String(32), primary_key=True),
         sa.Column("email", sa.Text, sa.ForeignKey("Users.email", ondelete="CASCADE"), nullable=False),
         sa.Column("file_name", sa.Text, nullable=False),
         sa.Column("s3_key", sa.Text, nullable=False),

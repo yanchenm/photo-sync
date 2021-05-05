@@ -2,7 +2,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from database.schemas import Photos
-from models.photos import Photo
+from models.photos import PhotoBase
 
 
 def get_photos(db: Session, email: str, start: int, count: int):
@@ -18,7 +18,7 @@ def get_photo_by_id(db: Session, photo_id: str):
     return db.query(Photos).filter(Photos.id == photo_id).first()
 
 
-def add_photo(db: Session, photo: Photo):
+def add_photo(db: Session, photo: PhotoBase):
     db_photo = Photos(**photo.dict())
     db.add(db_photo)
     db.commit()
