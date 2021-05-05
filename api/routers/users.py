@@ -4,8 +4,9 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 import database.users
+from dependencies.auth import authenticate_route
 from dependencies.database import get_db
-from models.users import User, UserLogin
+from models.users import User, UserCreate
 
 router = APIRouter(
     prefix="/user",
@@ -13,8 +14,8 @@ router = APIRouter(
 )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=User)
-def create_user(user: UserLogin, db: Session = Depends(get_db)):
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=User)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
     if os.getenv("DISABLE_SIGNUP") != "false":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="you can't do that right now")
 
@@ -36,3 +37,8 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
 
     user = User.from_orm(db_user)
     return user
+
+
+@router.get("", status_code=status.HTTP_200_OK, response_model=User)
+def get_authenticated_user(auth_user: User = Depends(authenticate_route)):
+    return auth_user

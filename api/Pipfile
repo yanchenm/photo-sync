@@ -8,10 +8,12 @@ fastapi = "*"
 uvicorn = "*"
 pydantic = "*"
 sqlalchemy = "*"
-bcrypt = "*"
 psycopg2-binary = "*"
 sqlalchemy-cockroachdb = "*"
 python-dotenv = "*"
+pyjwt = "*"
+passlib = "*"
+bcrypt = "*"
 
 [dev-packages]
 alembic = "*"

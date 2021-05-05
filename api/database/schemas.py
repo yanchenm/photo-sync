@@ -11,9 +11,6 @@ class Users(Base):
     password = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.current_timestamp())
 
-    photos = relationship("Photos", back_populates="owner")
-    tokens = relationship("Tokens", back_populates="owner")
-
 
 class Photos(Base):
     __tablename__ = "Photos"
@@ -28,12 +25,8 @@ class Photos(Base):
     size = Column(Float, nullable=False)
     uploaded_at = Column(DateTime, nullable=False, server_default=func.current_timestamp())
 
-    owner = relationship("Users", back_populates="photos")
-
 
 class Tokens(Base):
     __tablename__ = "Tokens"
     email = Column(String, ForeignKey("Users.email"), primary_key=True)
     token = Column(String, unique=True, primary_key=True)
-
-    owner = relationship("Users", back_populates="tokens")

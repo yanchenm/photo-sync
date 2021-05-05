@@ -1,30 +1,28 @@
 from datetime import datetime
-from typing import List
 
-import bcrypt
+from passlib.hash import bcrypt
 from pydantic import BaseModel
-
-from models.auth import Token
-from models.photos import Photo
 
 
 class UserBase(BaseModel):
     email: str
+
+
+class UserCreate(UserBase):
     name: str
+    password: str
+
+    def hash_password(self):
+        self.password = bcrypt.hash(self.password)
 
 
 class UserLogin(UserBase):
     password: str
 
-    def hash_password(self):
-        hashed_password = bcrypt.hashpw(self.password.encode("utf-8"), bcrypt.gensalt())
-        self.password = hashed_password.decode("utf-8")
-
 
 class User(UserBase):
+    name: str
     created_at: datetime
-    photos: List[Photo] = []
-    tokens: List[Token] = []
 
     class Config:
         orm_mode = True
@@ -34,4 +32,4 @@ class UserWithAuth(User):
     password: str
 
     def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+        return bcrypt.verify(password, self.password)

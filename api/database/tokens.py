@@ -1,5 +1,5 @@
 from sqlalchemy import and_
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import Session
 
 from database.schemas import Tokens
@@ -10,7 +10,7 @@ def is_token_valid(db: Session, email: str, token: str) -> bool:
     try:
         db.query(Tokens).filter(and_(Tokens.email == email, Tokens.token == token)).one()
         return True
-    except NoResultFound:
+    except (MultipleResultsFound, NoResultFound):
         return False
 
 
